@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>員工資料總覽</title>
+<link th:href="@{/css/bootstrap.min.css}" rel="stylesheet">
+<style>
+  /* 垂直置中表格內容 */
+  #saTable td, #newSaTable td {
+      vertical-align: middle;
+  }
+
+  /* 密碼欄位顯示/隱藏按鈕的對齊 */
+  .sa-password-group {
+      display: flex;
+      align-items: center; /* 垂直置中 */
+  }
+
+  .sa-password-group input {
+      flex: 1; /* 讓輸入框占據剩餘空間 */
+  }
+
+  .sa-password-group .btn-outline-secondary {
+      margin-left: 5px; /* 添加按鈕與輸入框之間的間距 */
+      height: 100%; /* 讓按鈕高度與輸入框一致 */
+  }
+</style>
+</head>
+<body>
+  <div th:replace="~{layout/saHeader}"></div>
+  <div class="container mt-4">
+      <!-- 查詢員工資料 -->
+      <h2>查詢員工</h2>
+      <table id="searchSaTable" class="table table-striped align-middle">
+          <tr>
+              <td>
+                  <label for="searchSaName">員工姓名</label>
+                  <input type="text" id="searchSaName" class="form-control" placeholder="員工姓名" oninput="performSaSearch()">
+              </td>
+              <td>
+                  <label for="searchSaEmail">員工信箱</label>
+                  <input type="email" id="searchSaEmail" class="form-control" placeholder="員工信箱" oninput="performSaSearch()">
+              </td>
+              <td>
+                  <label for="searchSaTel">員工電話</label>
+                  <input type="text" id="searchSaTel" class="form-control" placeholder="員工電話" oninput="performSaSearch()">
+              </td>
+              <td>
+                  <label for="searchSaStatus">帳號狀態</label>
+                  <select id="searchSaStatus" class="form-select" oninput="performSaSearch()">
+                      <option value="">所有狀態</option>
+                      <option value="1">帳號使用中</option>
+                      <option value="2">帳號已停權</option>
+                  </select>
+              </td>
+              <td>
+                  <button type="button" class="btn btn-secondary mt-4" onclick="resetSaSearch()">重置</button>
+              </td>
+          </tr>
+      </table>
+      <br>
+      <!-- 新增員工資料 -->
+      <h2>新增員工</h2>
+      <table id="newSaTable" class="table table-striped align-middle">
+          <tr>
+              <td><label for="newUserName">員工姓名</label><input type="text" id="newSaName" class="form-control" placeholder="員工姓名"></td>
+              <td><label for="newUserEmail">員工信箱</label><input type="email" id="newSaEmail" class="form-control" placeholder="員工信箱"></td>
+              <td><label for="newUserPassword">員工密碼</label>
+                  <div class="input-group sa-password-group">
+                      <input type="password" id="newSaPassword" class="form-control" placeholder="員工密碼">
+                      <button class="btn btn-outline-secondary" onclick="togglePassword('newSaPassword')">顯示密碼</button>
+                  </div>
+              </td>
+              <td><label for="newUserTel">員工電話</label><input type="text" id="newSaTel" class="form-control" placeholder="員工電話"></td>
+              <td><label for="newUserStatus">帳號狀態</label>
+                  <select id="newSaStatus" class="form-select">
+                      <option value="1">帳號使用中</option>
+                      <option value="2">帳號已停權</option>
+                  </select>
+              </td>
+              <td><button class="btn btn-primary mt-4" onclick="addSa()">新增</button></td>
+          </tr>
+      </table>
+      <br>
+      <!-- 員工資料列表 -->
+      <h2>員工列表</h2>
+      <table id="saTable" class="table table-striped align-middle">
+          <thead>
+              <tr>
+                  <th>員工ID</th>
+                  <th>員工姓名</th>
+                  <th>員工信箱</th>
+                  <th>員工密碼</th>
+                  <th>員工電話</th>
+                  <th>帳號狀態</th>
+                  <th>操作</th>
+              </tr>
+          </thead>
+          <tbody id="saTableBody"></tbody>
+      </table>
+  </div>
+  <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+  <script>
+      let allEmployees = []; // 儲存所有員工資料
+
+      // 初始化頁面
+      document.addEventListener("DOMContentLoaded", loadSaInfo);
+
+      function loadSaInfo() {
+          fetch("/saInfo/json")
+              .then(response => response.json())
+              .then(data => {
+                  allEmployees = data; // 儲存資料到全域變數
+                  displaySa(allEmployees); // 顯示資料
+              })
+              .catch(error => {
+                  console.error("Error:", error);
+                  alert("無法載入員工資料，請稍後再試。");
+              });
+      }
+
+      function displaySa(employees) {
+          const tableBody = document.getElementById("saTableBody");
+          tableBody.innerHTML = "";
+
+          if (employees.length === 0) {
+              tableBody.innerHTML = `
+                  <tr>
+                      <td colspan="7" class="text-center">沒有該員工資料。</td>
+                  </tr>
+              `;
+              return;
+          }
+
+          employees.forEach(sa => {
+              const row = `
+                  <tr>
+                      <td>${sa.saId}</td>
+                      <td><input type="text" class="form-control sa-name" value="${sa.saName}"></td>
+                      <td><input type="email" class="form-control sa-email" value="${sa.saEmail}"></td>
+                      <td>
+                          <div class="input-group sa-password-group">
+                              <input type="password" class="form-control sa-password" value="${sa.saPassword}">
+                              <button class="btn btn-outline-secondary" onclick="togglePasswordInput(this)">顯示密碼</button>
+                          </div>
+                      </td>
+                      <td><input type="text" class="form-control sa-tel" value="${sa.saTel}"></td>
+                      <td>
+                          <select class="form-select sa-status">
+                              <option value="1" ${sa.saStatus == 1 ? 'selected' : ''}>帳號使用中</option>
+                              <option value="2" ${sa.saStatus == 2 ? 'selected' : ''}>帳號已停權</option>
+                          </select>
+                      </td>
+                      <td><button class="btn btn-success" onclick="saveSaChanges(${sa.saId}, this)">儲存</button></td>
+                  </tr>
+              `;
+              tableBody.insertAdjacentHTML("beforeend", row);
+          });
+      }
+
+      function performSaSearch() {
+          const saName = document.getElementById("searchSaName").value.trim().toLowerCase();
+          const saEmail = document.getElementById("searchSaEmail").value.trim().toLowerCase();
+          const saTel = document.getElementById("searchSaTel").value.trim().toLowerCase();
+          const saStatus = document.getElementById("searchSaStatus").value;
+
+          const filteredSa = allEmployees.filter(sa => {
+              const matchesName = saName === "" || sa.saName.toLowerCase().includes(saName);
+              const matchesEmail = saEmail === "" || sa.saEmail.toLowerCase().includes(saEmail);
+              const matchesTel = saTel === "" || sa.saTel.toLowerCase().includes(saTel);
+              const matchesStatus = saStatus === "" || sa.saStatus == saStatus;
+
+              return matchesName && matchesEmail && matchesTel && matchesStatus;
+          });
+
+          displaySa(filteredSa);
+      }
+
+      function resetSaSearch() {
+          document.getElementById("searchSaName").value = "";
+          document.getElementById("searchSaEmail").value = "";
+          document.getElementById("searchSaTel").value = "";
+          document.getElementById("searchSaStatus").value = "";
+          displaySa(allEmployees);
+      }
+
+      function addSa() {
+          const newSa = {
+              saName: document.getElementById("newSaName").value,
+              saEmail: document.getElementById("newSaEmail").value,
+              saPassword: document.getElementById("newSaPassword").value,
+              saTel: document.getElementById("newSaTel").value,
+              saStatus: document.getElementById("newSaStatus").value
+          };
+
+          fetch("/saInfo/add", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(newSa)
+          })
+              .then(response => response.text())
+              .then(message => {
+                  alert(message);
+                  document.getElementById("newSaName").value = "";
+                  document.getElementById("newSaEmail").value = "";
+                  document.getElementById("newSaPassword").value = "";
+                  document.getElementById("newSaTel").value = "";
+                  document.getElementById("newSaStatus").value = "1";
+                  loadSaInfo();
+              })
+              .catch(error => {
+                  console.error("Error:", error);
+                  alert("新增失敗，請稍後再試。");
+              });
+      }
+
+      function saveSaChanges(saId, button) {
+          const row = button.closest("tr");
+          const saName = row.querySelector(".sa-name").value.trim();
+          const saEmail = row.querySelector(".sa-email").value.trim();
+          const saPassword = row.querySelector(".sa-password").value.trim();
+          const saTel = row.querySelector(".sa-tel").value.trim();
+          const saStatus = row.querySelector(".sa-status").value;
+
+          const updatedSa = { saId, saName, saEmail, saPassword, saTel, saStatus: parseInt(saStatus) };
+
+          fetch("/saInfo/update", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(updatedSa)
+          })
+              .then(response => response.text())
+              .then(message => {
+                  alert(message);
+                  loadSaInfo();
+              })
+              .catch(error => {
+                  console.error("Error:", error);
+                  alert("更新失敗，請稍後再試。");
+              });
+      }
+
+      function togglePasswordInput(button) {
+          const input = button.previousElementSibling;
+          input.type = input.type === "password" ? "text" : "password";
+          button.textContent = input.type === "password" ? "顯示密碼" : "隱藏密碼";
+      }
+
+      function togglePassword(inputId) {
+          const input = document.getElementById(inputId);
+          input.type = input.type === "password" ? "text" : "password";
+      }
+  </script>
+</body>
+</html>

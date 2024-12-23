@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>廣告管理</title>
+<link th:href="@{/css/bootstrap.min.css}" rel="stylesheet">
+<link href="https://unpkg.com/cropperjs/dist/cropper.css" rel="stylesheet">
+<style>
+  /* 垂直置中表格內容 */
+  #adTable td, #newAdTable td {
+      vertical-align: middle;
+  }
+  /* 圖片與按鈕水平排列 */
+  .image-container {
+      display: flex;
+      align-items: center;
+  }
+  .image-container img {
+      max-width: 450px;
+      border-radius: 5px;
+  }
+  .image-container button {
+      margin-left: 10px;
+  }
+  /* 裁切模態框 */
+  #cropperModal .modal-dialog {
+      max-width: 30%;
+  }
+  #cropperImage {
+      max-width: 100%;
+      max-height: 700px;
+      display: block;
+      margin: 0 auto;
+  }
+</style>
+</head>
+<body>
+  <div th:replace="~{layout/saHeader}"></div>
+  <div class="container mt-4">
+      <!-- 查詢廣告 -->
+      <h2>查詢廣告</h2>
+      <table id="searchAdTable" class="table table-striped align-middle">
+          <tr>
+              <td>
+                  <label for="searchAdName">廣告名稱</label>
+                  <input type="text" id="searchAdName" class="form-control" placeholder="廣告名稱" oninput="performSearch()">
+              </td>
+              <td>
+                  <label for="searchAdInfo">廣告敘述</label>
+                  <input type="text" id="searchAdInfo" class="form-control" placeholder="廣告敘述" oninput="performSearch()">
+              </td>
+              <td>
+                  <button type="button" class="btn btn-secondary mt-4" onclick="resetSearch()">重置</button>
+              </td>
+          </tr>
+      </table>
+      <br>
+
+      <!-- 新增廣告 -->
+      <h2>新增廣告</h2>
+      <table id="newAdTable" class="table table-striped align-middle">
+          <tr>
+              <td><label for="newAdName">廣告名稱</label><input type="text" id="newAdName" class="form-control" placeholder="廣告名稱"></td>
+              <td><label for="newAdInfo">廣告敘述</label><input type="text" id="newAdInfo" class="form-control" placeholder="廣告敘述"></td>
+              <td><label for="newAdImage">廣告圖片</label><input type="file" id="newAdImage" class="form-control" onchange="openCropper(this)"></td>
+              <td><button class="btn btn-primary mt-4" onclick="addAd()">新增</button></td>
+          </tr>
+      </table>
+      <br>
+
+      <!-- 廣告列表 -->
+      <h2>廣告列表</h2>
+      <table id="adTable" class="table table-striped align-middle">
+          <thead>
+              <tr>
+                  <th>廣告ID</th>
+                  <th>廣告名稱</th>
+                  <th>廣告敘述</th>
+                  <th>廣告圖片</th>
+                  <th>操作</th>
+              </tr>
+          </thead>
+          <tbody id="adTableBody"></tbody>
+      </table>
+  </div>
+
+  <!-- Cropper Modal -->
+  <div class="modal fade" id="cropperModal" tabindex="-1" aria-labelledby="cropperModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+          <div class="modal-content">
+              <div class="modal-header">
+                  <h5 class="modal-title" id="cropperModalLabel">裁切圖片 (1300*433)</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                  <div style="text-align: center;">
+                      <img id="cropperImage">
+                  </div>
+              </div>
+              <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                  <button type="button" class="btn btn-primary" onclick="cropAndSetImage()">裁切並儲存</button>
+              </div>
+          </div>
+      </div>
+  </div>
+
+  <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+  <script src="https://unpkg.com/cropperjs/dist/cropper.js"></script>
+  <script>
+     let allAds = [];
+let cropper;
+let currentFileInput;
+
+document.addEventListener("DOMContentLoaded", loadAdInfo);
+
+function loadAdInfo() {
+    fetch("/adInfo/json")
+        .then(response => response.json())
+        .then(data => {
+            allAds = data;
+            displayAds(allAds);
+        })
+        .catch(error => console.error("Error:", error));
+}
+
+function displayAds(ads) {
+    const tableBody = document.getElementById("adTableBody");
+    tableBody.innerHTML = "";
+
+    if (ads.length === 0) {
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="5" class="text-center">沒有符合條件的廣告資料。</td>
+            </tr>
+        `;
+        return;
+    }
+
+    ads.forEach(ad => {
+        const row = `
+            <tr>
+                <td>${ad.adId}</td>
+                <td><input type="text" class="form-control ad-name" value="${ad.adName}"></td>
+                <td><input type="text" class="form-control ad-info" value="${ad.adInfo}"></td>
+                <td>
+                    <div class="image-container">
+                        <img src="data:image/jpeg;base64,${ad.adImageBase64}" alt="廣告圖片">
+                        <button class="btn btn-secondary" onclick="triggerFileInput(${ad.adId})">更換圖片</button>
+                    </div>
+                    <input type="file" class="form-control ad-image" id="file-${ad.adId}" style="display: none;" onchange="openCropper(this)">
+                </td>
+                <td><button class="btn btn-success" onclick="updateAd(${ad.adId}, this)">儲存</button></td>
+            </tr>
+        `;
+        tableBody.insertAdjacentHTML("beforeend", row);
+    });
+}
+
+function performSearch() {
+    const adName = document.getElementById("searchAdName").value.trim().toLowerCase();
+    const adInfo = document.getElementById("searchAdInfo").value.trim().toLowerCase();
+
+    const filteredAds = allAds.filter(ad => {
+        const matchesName = adName === "" || ad.adName.toLowerCase().includes(adName);
+        const matchesInfo = adInfo === "" || ad.adInfo.toLowerCase().includes(adInfo);
+        return matchesName && matchesInfo;
+    });
+
+    displayAds(filteredAds);
+}
+
+function resetSearch() {
+    document.getElementById("searchAdName").value = "";
+    document.getElementById("searchAdInfo").value = "";
+    displayAds(allAds);
+}
+
+function openCropper(input) {
+    const file = input.files[0];
+    if (file) {
+        currentFileInput = input;
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            const cropperImage = document.getElementById("cropperImage");
+            cropperImage.src = e.target.result;
+            if (cropper) {
+                cropper.destroy();
+            }
+            cropper = new Cropper(cropperImage, {
+                aspectRatio: 3 / 1,
+                viewMode: 1,
+                autoCropArea: 1,
+                dragMode: 'move'
+            });
+            const modal = new bootstrap.Modal(document.getElementById("cropperModal"));
+            modal.show();
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
+function cropAndSetImage() {
+    if (cropper) {
+        const canvas = cropper.getCroppedCanvas({
+            width: 1300,
+            height: 433
+        });
+
+        canvas.toBlob(blob => {
+            // 創建一個新的 File 對象，包含文件名稱和 MIME 類型
+            const croppedFile = new File([blob], "cropped.jpg", { type: "image/jpeg" });
+
+            // 更新預覽圖片
+            const url = URL.createObjectURL(croppedFile);
+            const container = currentFileInput.parentElement.querySelector('.image-container');
+            const previewImage = container.querySelector('img');
+            previewImage.src = url;
+
+            // 將裁切後的文件存儲在 currentFileInput 的自定義屬性中
+            currentFileInput.croppedFile = croppedFile;
+        }, "image/jpeg");
+
+        // 關閉裁切模態框
+        const modal = bootstrap.Modal.getInstance(document.getElementById("cropperModal"));
+        modal.hide();
+    }
+}
+
+function triggerFileInput(adId) {
+    document.getElementById(`file-${adId}`).click();
+}
+
+function addAd() {
+    const newAd = new FormData();
+    newAd.append("adName", document.getElementById("newAdName").value);
+    newAd.append("adInfo", document.getElementById("newAdInfo").value);
+
+    // 確保圖片文件存在，否則傳遞一個空的 Blob
+    if (currentFileInput && currentFileInput.croppedFile) {
+        newAd.append("adImage", currentFileInput.croppedFile);
+    } else {
+        // 如果沒有裁切過的文件，傳遞原始文件或處理為空
+        const originalFile = currentFileInput && currentFileInput.files[0];
+        if (originalFile) {
+            newAd.append("adImage", originalFile);
+        } else {
+            newAd.append("adImage", new Blob());
+        }
+    }
+
+    fetch("/adInfo/add", {
+        method: "POST",
+        body: newAd
+    })
+        .then(response => response.text())
+        .then(message => {
+            alert(message);
+            loadAdInfo();
+        })
+        .catch(error => console.error("Error:", error));
+}
+
+function updateAd(adId, button) {
+    const row = button.closest("tr");
+    const adName = row.querySelector(".ad-name").value.trim();
+    const adInfo = row.querySelector(".ad-info").value.trim();
+    const adImageInput = row.querySelector(".ad-image");
+
+    const updatedAd = new FormData();
+    updatedAd.append("adId", adId);
+    updatedAd.append("adName", adName);
+    updatedAd.append("adInfo", adInfo);
+
+    // 確保圖片文件存在，否則不更新圖片或傳遞空的 Blob
+    if (adImageInput && adImageInput.croppedFile) {
+        updatedAd.append("adImage", adImageInput.croppedFile);
+    } else {
+        // 如果沒有裁切過的文件，傳遞原始文件或不更新圖片
+        const originalFile = adImageInput && adImageInput.files[0];
+        if (originalFile) {
+            updatedAd.append("adImage", originalFile);
+        } else {
+            // 如果不希望更新圖片，可以選擇不傳遞 adImage 字段
+            // updatedAd.append("adImage", new Blob()); // 或傳遞空的 Blob
+        }
+    }
+
+    fetch("/adInfo/update", {
+        method: "POST",
+        body: updatedAd
+    })
+        .then(response => response.text())
+        .then(message => {
+            alert(message);
+            loadAdInfo();
+        })
+        .catch(error => console.error("Error:", error));
+}
+
+  </script>
+</body>
+</html>
