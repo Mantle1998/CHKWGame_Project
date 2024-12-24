@@ -234,8 +234,8 @@ public class ItemController {
     @GetMapping("/memberCenter/item/editItem")
     public String memberCenteEditItem(@RequestParam Integer id, Model model, HttpSession session) {
         Item item = itemService.findItemById(id);
-        UserInfo user = userInfoRepo.getById(1);
-//        LoginBean user = (LoginBean) session.getAttribute("user");
+
+        LoginBean user = (LoginBean) session.getAttribute("user");
         List<ItemPhoto> sortedPhotos = itemPhotoRepo.findByItem_ItemIdOrderBySortOrderAsc(id);
         for(ItemPhoto i : sortedPhotos) {
         System.out.println(i.getId());
