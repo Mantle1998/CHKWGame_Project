@@ -3,16 +3,22 @@ package com.example.demo.service;
 import java.util.ArrayList;
 import java.util.List;
 
+
 import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+
 import com.example.demo.model.RegisterBean;
 import com.example.demo.model.RegisterRepository;
 
 
 @Service
 public class RegisterService {
-
+	
+	
+	
 	@Autowired
 	private RegisterRepository registerRepository;
 	
@@ -24,7 +30,8 @@ public class RegisterService {
 	
 	public List<String> registerUser(RegisterBean user){
 		List<String> errors = new ArrayList<>();
-	
+		
+		
 	
 	 
 		// 資料驗證（簡單檢查空值）
@@ -79,7 +86,11 @@ public class RegisterService {
 		user.setUserPassword(encryptedPassword);// 將加密後的密碼設置回 user 對象
 		
 		// 設定 userStatus 為 1（已啟用）
-        user.setUserStatus(1); // 預設帳號為啟用狀態
+		// 設定 LoginType 為 LOCAL
+        user.setUserStatus(1);	//預設帳號為啟用狀態
+        //user.setLoginType("LOCAL");	//用此註冊方式，值設定為LOCAL。
+        System.out.println("設置帳號啟用狀態：" + user.getUserStatus());
+        //System.out.println("設置登入方式：" + user.getLoginType());
 		
 		// 使用 save() 方法將註冊資料儲存到資料庫
 		registerRepository.save(user);
@@ -91,6 +102,8 @@ public class RegisterService {
 				
 				
 	}
+	
+	
 	
 
 

@@ -35,7 +35,7 @@ public class LoginService {
 		// 使用 passwordEncoder 比對明文密碼和加密密碼
 		if(passwordEncoder.matches(userPassword, user.getUserPassword())) {
 			// 如果密碼匹配，檢查帳號狀態
-		if(user.getUserStatus() == 1) {
+		if(user.getUserStatus() == 1){
 			// 帳號啟用且密碼匹配，返回用戶資料
 			user.setStatus("success");
 			user.setMessage("登入成功");
@@ -55,7 +55,27 @@ public class LoginService {
 			System.out.println("後端提示-密碼錯誤 : " + user.getUserEmail());
 			return user;
 		}
+	}
+	
+	// 處理 Google 登入邏輯
+	public LoginBean handleGoogleLogin(String email, String name) {
+		System.out.println("Handling Google login for user: " + email);
 		
-
+		// 查詢資料庫以檢查用戶是否存在
+        LoginBean user = loginRepository.findByUserEmail(email);
+        
+        if (user == null) {
+            // 若用戶不存在，創建新用戶並保存
+            user = new LoginBean();
+            user.setUserEmail(email);
+            user.setUserName(name);
+            user.setUserStatus(1);	//預設帳號為啟用狀態
+//            user.setLoginType("GOOGLE");	//用此註冊方式，值設定為GOOGLE。
+            user.setStatus("success");
+            user.setMessage("用戶資料創建成功");
+            loginRepository.save(user);
+        }
+     // 返回用戶資料
+        return user;
 	}
 }

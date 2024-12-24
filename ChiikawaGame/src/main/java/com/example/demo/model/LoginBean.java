@@ -31,6 +31,9 @@ public class LoginBean {
 	@Column(name = "userStatus")
 	private int userStatus;
 	
+//	@Column(name = "loginType")
+//	private String loginType;
+
 	@Transient
 	private String status;
 	
@@ -122,5 +125,13 @@ public class LoginBean {
     public void setMessage(String message) {
         this.message = message;
     }
+	
+//    public String getLoginType() {
+//		return loginType;
+//	}
+//
+//	public void setLoginType(String loginType) {
+//		this.loginType = loginType;
+//	}
 	
 }

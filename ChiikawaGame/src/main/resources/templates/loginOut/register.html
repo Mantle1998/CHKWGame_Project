@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+
 <title>會員註冊頁面</title>
 
 <!-- 導入Bootstrap -->
@@ -16,6 +17,8 @@
 <!-- 導入jQuery -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
+<!-- 導入reCAPTCHA -->
+<script src="https://www.google.com/recaptcha/api.js" async defer></script>
 
 <style>
 body {
@@ -51,6 +54,47 @@ body {
 	color: black;
 	border: none;
 }
+
+.alert.alert-warning {
+      background-color: transparent;
+      color: #856404;
+      border: none;
+    }
+    
+    .form-floating {
+  	  position: relative; /* 確保按鈕能相對輸入框定位 */
+	}
+	
+
+	.toggle-password-btn {
+  	  position: absolute;
+  	  top: 0;
+  	  right: 0;
+  	  height: 58px; 	/* 按鈕高度與輸入框相同 */
+  	  border-top-left-radius: 0; /* 移除按鈕左上角圓角 */
+  	  border-bottom-left-radius: 0; /* 移除按鈕左下角圓角 */
+	  
+	}
+
+	#floatingPassword {
+  	  padding-right: 100px; 	/* 預留空間給顯示密碼按鈕 */
+	}
+	
+	.feedback-container {
+  	  min-height: 1.5em; /* 預留固定高度的空間 */
+  	  font-size: 0.875em; /* 可調整字體大小 */
+	}
+
+	.invalid-feedback {
+  	  display: none; /* 預設不顯示 */
+  	  color: #d32f2f;   	  
+	}
+	
+	/* 移除圓圈包著驚嘆號的圖示 */
+	.is-invalid {
+    border-color: #dc3545 !important; /* 邊框變為紅色 */
+    background-image: none !important; /* 移除背景圖示 */
+	}
 </style>
 </head>
 
@@ -101,12 +145,15 @@ body {
 					placeholder="密碼" name="userPassword" required>
 				<!-- 輸入區塊 -->
 				<label for="floatingPassword">密碼</label>
+				<button type="button" id="togglePassword" class="btn btn-outline-secondary position-absolute toggle-password-btn">
+    			<i class="bi bi-eye"></i>
+  				</button>
 			</div>
 
 
 
 			<div class="form-floating mb-3">
-				<input type="text" class="form-control" id="floatingUserbirthday"
+				<input type="date" class="form-control" id="floatingUserbirthday"
 					placeholder="生日格式(YYYY-MM-DD)" name="userBirthday" required>
 				<!-- 輸入區塊 -->
 				<label for="floatingUserbirthday">生日</label>
@@ -118,9 +165,11 @@ body {
 				<!-- 輸入區塊 -->
 				<label for="floatingPhone">電話號碼</label>
 			</div>
-
-			<button class="w-100 btn btn-lg btn-warning" type="submit">註冊</button>
+			
+			<div class="g-recaptcha" data-sitekey="6Ld2PqQqAAAAADkh-oaJbDAN5-bqTG9faOiAqnsB"></div>
 			<!-- 註冊按鈕 -->
+			<button class="w-100 btn btn-lg btn-warning" type="submit">註冊</button>
+			
 			<p class="mt-5 mb-3 text-muted">&copy; 2024 Company, Inc</p>
 		</form>
 	</main>
@@ -189,13 +238,38 @@ body {
 		src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 
 	<script>
-	
-		//----vv送出表單vv----
+		
+		
 	
      	$(document).ready(function() {
+     	
+     	
+     	
+     	// 密碼顯示/隱藏
+  		$('#togglePassword').on('click', function () {
+    	const passwordInput = $('#floatingPassword');
+    	const type = passwordInput.attr('type') === 'password' ? 'text' : 'password';
+    	passwordInput.attr('type', type);
+
+    	// 切換按鈕圖示
+    	const icon = $(this).find('i');
+    	icon.toggleClass('bi-eye bi-eye-slash');
+  		});
+  	
+  		//----vv送出表單vv----
+     	
     	$('#registerForm').on('submit', function(e) {
         e.preventDefault();// 防止表單默認提交行為
+		
+		// 獲取 reCAPTCHA token
+    	const recaptchaResponse = grecaptcha.getResponse();
 
+    	// 檢查是否完成 reCAPTCHA 驗證
+    	if (!recaptchaResponse) {
+        	alert('請完成 reCAPTCHA 驗證');
+        	return;
+    	}
+		
         
 		
         const formData = {
@@ -204,19 +278,23 @@ body {
             userIdNumber: $('#floatingIdCard').val().trim(),
             userPassword: $('#floatingPassword').val().trim(),
             userBirthday: $('#floatingUserbirthday').val().trim(),
-            userTel: $('#floatingPhone').val().trim()
+            userTel: $('#floatingPhone').val().trim(),
+            recaptchaResponse: recaptchaResponse // 包含 reCAPTCHA token
+        	
         };
 
         // 在這裡打印發送的資料
             console.log('Sending data:', JSON.stringify(formData));
 		
 		//----^^送出表單^^----
-		
+				
         // ----vv發送AJAX請求到後端vv----
+        
         
         $.ajax({
     		url: '/api/register',
     		type: 'POST',
+    		
     		contentType: 'application/json',
     		dataType: 'json',
     		data: JSON.stringify(formData), // 發送的資料
