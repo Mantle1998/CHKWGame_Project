@@ -15,7 +15,7 @@
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
             <div class="container-fluid">
                 <!-- 標誌 (Logo) -->
-                <a class="navbar-brand btn btn-warning text-black me-3" th:href="@{/}">
+                <a class="navbar-brand btn btn-warning text-black me-3" th:href="@{/saInfo}">
                     CHKWGame
                 </a>
                 
@@ -28,17 +28,6 @@
                 <!-- 導航內容 -->
                 <div class="collapse navbar-collapse" id="navbarContent">
                     <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                        <!-- 人員資料管理下拉選單 -->
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="personnelDropdown" role="button" 
-                               data-bs-toggle="dropdown" aria-expanded="false">
-                                人員資料管理
-                            </a>
-                            <ul class="dropdown-menu" aria-labelledby="personnelDropdown">
-                                <li><a class="dropdown-item" th:href="@{/saInfo}">員工總覽</a></li>
-                                <li><a class="dropdown-item" th:href="@{/userInfo}">會員總覽</a></li>
-                            </ul>
-                        </li>
                         
                         <!-- 商城頁面管理下拉選單 -->
                         <li class="nav-item dropdown">
@@ -67,6 +56,17 @@
                                 <li><a class="dropdown-item" th:href="@{/}">FAQ總覽</a></li>
                             </ul>
                         </li>
+                        <!-- 人員資料管理下拉選單 -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="personnelDropdown" role="button" 
+                               data-bs-toggle="dropdown" aria-expanded="false">
+                                人員資料管理
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="personnelDropdown">
+                                <li><a class="dropdown-item" th:href="@{/saInfo}">員工總覽</a></li>
+                                <li><a class="dropdown-item" th:href="@{/userInfo}">會員總覽</a></li>
+                            </ul>
+                        </li>
                     </ul>
 
                     <!-- 登出按鈕 -->
@@ -78,12 +78,6 @@
         </nav>
     </header>
 
-    <!-- 引入必要的 JavaScript 文件 -->
-    <!-- 引入 Popper.js -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.11.7/umd/popper.min.js" crossorigin="anonymous"></script>
-    <!-- 引入 Bootstrap JS -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
-    <!-- 引入其他必要的 JS -->
     <script th:src="@{/js/axios.min.js}"></script>
 </body>
 </html>
