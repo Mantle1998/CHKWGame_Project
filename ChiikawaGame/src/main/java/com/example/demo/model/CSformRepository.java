@@ -1,8 +1,7 @@
 package com.example.demo.model;
 
-import java.util.List;
-
 import org.springframework.data.jpa.repository.JpaRepository;
+import com.example.demo.model.CSform;
 
 // 定義一個介面 CSFormRepository，繼承 JpaRepository 來進行 CSForm 的 CRUD 操作
 public interface CSformRepository extends JpaRepository<CSform, Integer> {
@@ -11,3 +10,5 @@ public interface CSformRepository extends JpaRepository<CSform, Integer> {
 	CSform findByCSFormId(Integer CSFormId);
 	
 }
+
+	

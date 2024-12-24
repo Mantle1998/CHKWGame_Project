@@ -1,0 +1,20 @@
+body {
+    font-family: Arial, sans-serif; /* 設定字體 */
+    background-color: #f7f7f7; /* 背景顏色 */
+    margin: 0; /* 去掉外邊距 */
+    padding: 20px; /* 內部填充 */
+}
+#chat {
+    border: 1px solid #ddd; /* 聊天區域邊框 */
+    padding: 10px; /* 聊天區域內部填充 */
+    height: 300px; /* 聊天區域高度 */
+    overflow-y: scroll; /* 超出部分顯示滾動條 */
+    margin-bottom: 10px; /* 下方外邊距 */
+}
+#message {
+    width: 80%; /* 輸入框寬度 */
+    padding: 10px; /* 內部填充 */
+}
+button {
+    padding: 10px; /* 按鈕內部填充 */
+}

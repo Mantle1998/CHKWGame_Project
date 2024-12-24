@@ -1,0 +1,165 @@
+	<!DOCTYPE html>
+	<html lang="zh-hant-TW">
+		<head>
+		    <meta charset="UTF-8" />
+		    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		    <title>客服中心</title>
+		
+		    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+		
+		    <style>
+		    	body {
+				  font-family: Arial, sans-serif;  /* 設定網頁的字型為 Arial，無法使用時則為 sans-serif 字型 */
+				  background-color: #f7f7f7;  /* 設定背景顏色為淺灰色 (#f7f7f7) */
+				  text-align: center;  /* 將所有文字內容置中對齊 */
+				}
+				
+				.header {
+				  background-color: #3a6ed5;  /* 設定頁首區塊的背景顏色為藍色 (#3a6ed5) */
+				  padding: 20px;  /* 在頁首區塊的四周增加 20px 的內邊距 */
+				  color: white;  /* 將頁首區塊內的文字顏色設為白色 */
+				}
+				
+				.header input {
+				  padding: 10px;  /* 設定輸入框內的文字與邊緣的間距為 10px */
+				  font-size: 16px;  /* 設定輸入框內文字的字型大小為 16px */
+				  width: 60%;  /* 設定輸入框寬度為父容器的 60% */
+				  max-width: 300px;  /* 設定輸入框的最大寬度為 300px */
+				  border: none;  /* 移除輸入框的邊框 */
+				  border-radius: 5px;  /* 將輸入框的四個角設定為圓角，半徑為 5px */
+				}
+				
+				.header button {
+				  padding: 10px 20px;  /* 設定按鈕內文字與邊緣的間距，上下 10px，左右 20px */
+				  font-size: 16px;  /* 設定按鈕內文字的字型大小為 16px */
+				  border: none;  /* 移除按鈕的邊框 */
+				  background-color: #224baf;  /* 設定按鈕的背景顏色為深藍色 (#224baf) */
+				  color: white;  /* 設定按鈕內文字的顏色為白色 */
+				  border-radius: 5px;  /* 將按鈕的四個角設定為圓角，半徑為 5px */
+				  cursor: pointer;  /* 當滑鼠指向按鈕時，顯示為點選手勢 (手指形狀) */
+				}
+				
+				.grid-container {
+				  display: grid;  /* 設定為 CSS Grid 佈局 */
+				  grid-template-columns: repeat(5, 1fr);  /* 設定 5 欄，每欄的寬度相同，為 1fr (可分配的剩餘空間) */
+				  gap: 20px;  /* 每個格子之間的間距為 20px */
+				  padding: 20px;  /* 設定網格容器四周的內邊距為 20px */
+				  max-width: 1200px;  /* 設定網格容器的最大寬度為 1200px */
+				  margin: 0 auto;  /* 使網格容器水平置中 */
+				}
+				
+				.grid-item {
+				  background-color: white;  /* 設定每個格子的背景顏色為白色 */
+				  border-radius: 10px;  /* 將格子的四個角設定為圓角，半徑為 10px */
+				  padding: 20px;  /* 設定格子內的內容與邊緣的間距為 20px */
+				  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);  /* 設定格子周圍的陰影，位移 0px 上下、2px 左右，5px 模糊，顏色為半透明的黑色 */
+				  text-align: center;  /* 將格子內的文字置中對齊 */
+				  transition: transform 0.2s;  /* 當格子有動態變化時 (如縮放)，設定 0.2 秒的過渡效果 */
+				}
+				
+				.grid-item:hover {
+				  transform: scale(1.05);  /* 當滑鼠懸停時，將格子縮放至 1.05 倍大小 */
+				}
+				
+				.grid-item img {
+				  width: 80px;  /* 設定圖片的寬度為 80px */
+				  height: 80px;  /* 設定圖片的高度為 80px */
+				}
+				
+				.grid-item p {
+				  margin-top: 10px;  /* 設定段落文字與圖片之間的間距為 10px */
+				  font-size: 18px;  /* 設定段落文字的字型大小為 18px */
+				  font-weight: bold;  /* 設定文字為粗體 */
+				  color: #333;  /* 設定文字顏色為深灰色 (#333) */
+				}
+				
+				.bottom-row {
+				  display: flex;  /* 使用彈性盒子佈局 (flexbox) */
+				  justify-content: center;  /* 將底部按鈕水平居中排列 */
+				  gap: 20px;  /* 底部按鈕之間的間距為 20px */
+				  margin-top: 20px;  /* 設定底部按鈕區域與上方的間距為 20px */
+				  flex-wrap: nowrap;  /* 確保按鈕不會換行排列 */
+				}
+				
+				.special-item p {
+				  color: red;  /* 將 `.special-item` 元素內的段落文字顏色設為紅色 */
+				}
+				
+				.bottom-buttons {
+				  width: 200px;  /* 設定底部按鈕的寬度為 200px */
+				  background-color: white;  /* 設定按鈕的背景顏色為白色 */
+				  border-radius: 10px;  /* 將按鈕的四個角設定為圓角，半徑為 10px */
+				  padding: 20px;  /* 設定按鈕內部與邊緣的間距為 20px */
+				  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);  /* 設定按鈕的陰影效果 */
+				  text-align: center;  /* 將按鈕內的文字置中對齊 */
+				  transition: transform 0.2s;  /* 當按鈕有動態變化時 (如縮放)，設定 0.2 秒的過渡效果 */
+				}
+				
+				.bottom-buttons img {
+				  width: 80px;  /* 設定按鈕內圖片的寬度為 80px */
+				  height: 80px;  /* 設定按鈕內圖片的高度為 80px */
+				}
+				
+				.bottom-buttons:hover {
+				  transform: scale(1.05);  /* 當滑鼠懸停時，將按鈕縮放至 1.05 倍大小 */
+				}
+				
+				a {
+				  text-decoration: none;  /* 移除超連結的底線 */
+				  color: inherit;  /* 確保按鈕文字顏色繼承父元素的設定 */
+				} 
+		   </style>
+	  
+	  	</head>
+  	
+	  	<body>
+	  	
+			<!-- header -->
+			<div th:replace="~{Customer_Service/html/Header}"></div>
+		
+			<!-- body -->
+		     
+		    <div class="grid-container">
+		        <a href="./CSQAData.html?category=帳號相關" class="grid-item">
+		            <img src="./img/my_account.png" alt="帳號相關" />
+		            <p>帳號相關</p>
+		        </a>
+		        <a href="./CSQAData.html?category=平台守則" class="grid-item">
+		            <img src="./img/platform_rules.png" alt="平台守則" />
+		            <p>平台守則</p>
+		        </a>
+		        <a href="./CSQAData.html?category=買家相關" class="grid-item">
+		            <img src="./img/buyer.png" alt="買家相關" />
+		            <p>買家相關</p>
+		        </a>
+		        <a href="./CSQAData.html?category=賣家相關" class="grid-item">
+		            <img src="./img/seller.png" alt="賣家相關" />
+		            <p>賣家相關</p>
+		        </a>
+		        <a href="./CSQAData.html?category=其他問題" class="grid-item">
+		            <img src="./img/other_issues.png" alt="其他問題" />
+		            <p>其他問題</p>
+		        </a>
+		    </div>
+		
+		    <div class="bottom-row">
+		        <a th:href="@{/csform}" class="bottom-buttons special-item">
+		            <img src="./img/other_help.png" alt="客服表單" />
+		            <p>填寫客服表單</p>
+		        </a>
+		        <a href="./Chat_Room.html" class="bottom-buttons special-item">
+		            <img src="./img/urgent_help.png" alt="線上客服" />
+		            <p>線上客服聊天室</p>
+		        </a>
+		    </div>
+		
+			<!-- footer -->
+			<div th:replace="~{Customer_Service/html/footer}"></div>
+		
+			<!-- script -->
+		   	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
+		    <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
+	
+	  </body>
+	  
+	</html>

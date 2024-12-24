@@ -1,19 +1,12 @@
 package com.example.demo.model;
 
 import java.util.Date;
-import java.util.List;
-
-import org.springframework.format.annotation.DateTimeFormat;
-
-import jakarta.persistence.CascadeType;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.PrimaryKeyJoinColumn;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
@@ -27,12 +20,12 @@ public class CSQAData {
     // 指定主鍵 (Primary Key) 並自動生成 ID 值
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "CSQADataid")
-    private Integer CSQADataid;
+    @Column(name = "CSQADataId")
+    private Integer CSQADataId;
     // 用於儲存表格中的 ID 欄位
 
     // 指定 "CSQADataSort" 欄位，必須是唯一且不可為空值
-    @Column(name = "CSQADataSort", unique = true, nullable = false)
+    @Column(name = "CSQADataSort", nullable = false)
     private String CSQADataSort;
     // 用於儲存分類資訊
 
@@ -46,12 +39,12 @@ public class CSQAData {
     private String CSQADataContent;
     // 用於儲存文章內容
 
-    // 使用 @DateTimeFormat 來指定日期格式，@Temporal 來指定資料庫中的時間型態
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") // 格式化日期為 yyyy-MM-dd HH:mm:ss
-    @Temporal(TemporalType.TIMESTAMP)
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone="GMT+8") // 只顯示日期，不顯示時間
+    @Column(name = "CSQADataDATE")
+    @Temporal(TemporalType.DATE) // 設定為日期型態
     private Date CSQADataDATE;
     // 用於儲存文章建立的日期與時間
-
+    
     // 指定 "CSQADataChack" 欄位，不可為空值
     @Column(name = "CSQADataChack", nullable = false)
     private Integer CSQADataChack;
@@ -59,12 +52,12 @@ public class CSQAData {
 
  // 以下是 getter 和 setter 方法，用於取得和設定屬性值
     
-	public Integer getCSformid() {
-		return CSQADataid;
+	public Integer getCSQADataId() {
+		return CSQADataId;
 	}
 
-	public void setCSformid(Integer CSQADataid) {
-		this.CSQADataid = CSQADataid;
+	public void setCSQADataId(Integer cSQADataId) {
+		this.CSQADataId = cSQADataId;
 	}
 
 	public String getCSQADataSort() {

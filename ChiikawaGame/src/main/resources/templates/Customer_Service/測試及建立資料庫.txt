@@ -1,0 +1,50 @@
+-- 建立資料庫 ChiikawaGame
+CREATE DATABASE ChiikawaGame;
+
+-- 使用 ChiikawaGame 資料庫
+USE ChiikawaGame;
+
+-- 建立 CSQA 表格
+CREATE TABLE CSQAData (
+    CSQADataId INT PRIMARY KEY IDENTITY(1,1), -- 主鍵，自動增量
+    CSQADataSort NVARCHAR(30),                -- 分類
+    CSQADataTitle NVARCHAR(30),               -- 標題
+    CSQADataContent NVARCHAR(300),            -- 內容
+    CSQADataDATE Date DEFAULT GETDATE(),      -- 最後修改日期，預設為當前日期
+    CSQADataChack INT                          -- 上架狀態（0=未上架，1=已上架）
+);
+
+-- 建立 CSForm 表格
+CREATE TABLE CSForm (
+    CSformId INT PRIMARY KEY IDENTITY(1,1), -- 主鍵，自動增量
+    UserId INT ,                            --使用者ID
+    CSFormSort NVARCHAR(30),                -- 問題分類
+    CSFormTitle NVARCHAR(30),               -- 問題標題
+    CSFormContent NVARCHAR(300),            -- 問題內容
+    CSformDate DATE DEFAULT GETDATE(),      -- 建立日期，預設為當前日期
+    CSformChack INT                          -- 問題狀態（0=未審核，1=已審核）
+    FOREIGN KEY (UserId) REFERENCES users (id)--連接user主鍵Id
+);
+
+-- 建立 Message 表格
+CREATE TABLE Message (
+    MessageId INT PRIMARY KEY IDENTITY(1,1), -- 主鍵，自動增量
+	MessageuserId int,						 -- 訊息收件者
+    MessageTitle NVARCHAR(30),               -- 訊息標題
+    MessageContent NVARCHAR(300),            -- 訊息內容
+    MessageDate DATE DEFAULT GETDATE(),      -- 訊息傳送日期
+    FOREIGN KEY (MessageuserId) REFERENCES users (id));--連接user主鍵Id
+
+--本身
+	select * from CSQAData;
+	select * from CSForm;
+	select * from Message;
+
+--外來
+	select * from users;
+	select * from userInfo;
+
+--清空資料表
+	TRUNCATE TABLE CSForm
+	TRUNCATE TABLE CSQAData
+	TRUNCATE TABLE Message

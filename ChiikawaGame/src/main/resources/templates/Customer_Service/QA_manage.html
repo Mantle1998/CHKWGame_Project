@@ -1,0 +1,437 @@
+	<!DOCTYPE html>
+	<html lang="zh-hant-TW">
+	<head>
+    	<meta charset="UTF-8" />
+    	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    	<title>Q&A表單管理</title>
+
+    	<link th:href="@{/css/bootstrap.min.css}" rel="stylesheet">
+
+		<style>
+	        body {
+	            font-family: Arial, sans-serif;
+	            margin: 20px;
+	        }
+	        
+	        .content-wrapper {
+	            width: 90%;
+	            max-width: 1400px;
+	            margin: 0 auto;
+	            padding: 0 15px;
+	        }
+	        
+	        table {
+	            width: 100%;
+	            border-collapse: collapse;
+	            margin-top: 20px;
+	        }
+	        
+	        th, td {
+	            border: 1px solid #ddd;
+	            padding: 8px;
+	            text-align: left;
+	            word-break: break-word;
+	        }
+	        
+	        th {
+	            background-color: #f2f2f2;
+	        }
+	        
+	        .header-btn {
+	            background-color: #ffc107;
+	            color: black;
+	            border-radius: 0.25rem;
+	        }
+	        
+	        .header-btn:hover {
+	            background-color: #e0a800;
+	        }
+	        
+	        button {
+	            background-color: #007bff;
+	            color: white;
+	            border: none;
+	            border-radius: 0.25rem;
+	            padding: 8px 12px;
+	            cursor: pointer;
+	        }
+	        
+	        button:hover {
+	            background-color: #0056b3;
+	        }
+	
+	        .table-responsive {
+	            overflow-x: auto;
+	        }
+    	</style>
+
+	</head>
+	<body>
+	
+	    <div th:replace="~{Customer_Service/html/saHeader}"></div>
+	
+		<div class="content-wrapper">
+	        <h1 class="text-center">
+	            <span class="btn header-btn" style="font-size: 25px;">Q&A表單管理</span>
+	        </h1>
+
+			<!-- 分類篩選 -->
+	        <div class="mt-4">
+	            <div class="mb-4" style="display: flex; gap: 10px; align-items: center;">
+			    <label for="categoryFilter" style="flex-shrink: 0;">篩選分類:</label>
+			    <select id="categoryFilter" class="form-control" style="width: 200px;">
+			        <option value="all">全部分類</option>
+			        <option value="帳號相關">帳號相關</option>
+			        <option value="平台守則">平台守則</option>
+			        <option value="買家相關">買家相關</option>
+			        <option value="賣家相關">賣家相關</option>
+			        <option value="其他問題">其他問題</option>
+			    </select>
+			    <button type="button" class="btn btn-primary" id="new" data-bs-toggle="modal" data-bs-target="#addModal" style="margin-left: auto;">新增項目</button>
+			</div>
+
+	            
+	            <div class="mb-4">
+	                <div class="table-responsive">
+	                    <table id="faTable" class="table table-striped">
+	                        <thead>
+	                            <tr>
+	                                <th>Q&A編號</th>
+	                                <th>分類</th>
+	                                <th>標題</th>
+	                                <th>內容</th>
+	                                <th>更新時間</th>
+	                                <th>上架狀態</th>
+	                                <th>修改</th>
+	                            </tr>
+	                        </thead>
+	                        <tbody id="qaTable">
+	                            <!-- 資料將通過 JavaScript 動態插入 -->
+	                        </tbody>
+	                    </table>
+	                </div>
+	            </div>
+	        </div>
+	    </div>
+	
+    	<!-- 新增 彈出框 -->
+	    <div class="modal fade" id="addModal" tabindex="-1" aria-labelledby="addModalLabel" aria-hidden="true">
+		    <div class="modal-dialog">
+		        <div class="modal-content">
+		            <div class="modal-header">
+		                <h5 class="modal-title" id="addModalLabel">新增 Q&A</h5>
+		                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		            </div>
+		            <div class="modal-body">
+		                <form id="addForm">
+		                    <div class="mb-3">
+		                        <label for="formSort" class="form-label">分類</label>
+		                        <select class="form-select" id="formSort" required>
+		                            <option value="帳號相關">帳號相關</option>
+		                            <option value="平台守則">平台守則</option>
+		                            <option value="買家相關">買家相關</option>
+		                            <option value="賣家相關">賣家相關</option>
+		                            <option value="其他問題">其他問題</option>
+		                        </select>
+		                    </div>
+		                    <div class="mb-3">
+		                        <label for="formTitle" class="form-label">標題</label>
+		                        <input type="text" class="form-control" id="formTitle" required>
+		                    </div>
+		                    <div class="mb-3">
+		                        <label for="formContent" class="form-label">內容</label>
+		                        <textarea class="form-control" id="formContent" rows="3" required></textarea>
+		                    </div>
+		                </form>
+		            </div>
+		            <div class="modal-footer">
+		                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
+		                <button type="button" class="btn btn-primary" id="addQAForm" onclick="addQAForm()">儲存</button>
+		            </div>
+		        </div>
+		    </div>
+		</div>
+
+	    <!-- 修改 彈出框 -->
+		<div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
+		    <div class="modal-dialog" role="document">
+		        <div class="modal-content">
+		            <div class="modal-header">
+		                <h5 class="modal-title" id="editModalLabel">Q&A修改</h5>
+		                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		            </div>
+		            <div class="modal-body">
+		                <form id="editForm">
+		                    <input type="hidden" id="editCSQADataId">
+		                    <div class="form-group">
+		                        <label for="editCSQADataSort">分類</label>
+		                        <select class="form-control" id="editCSQADataSort">
+		                            <option value="帳號相關">帳號相關</option>
+		                            <option value="平台守則">平台守則</option>
+		                            <option value="買家相關">買家相關</option>
+		                            <option value="賣家相關">賣家相關</option>
+		                            <option value="其他問題">其他問題</option>
+		                        </select>
+		                    </div>
+		                    <div class="form-group">
+		                        <label for="editCSQADataTitle">標題</label>
+		                        <input type="text" class="form-control" id="editCSQADataTitle">
+		                    </div>
+		                    <div class="form-group">
+		                        <label for="editCSQADataContent">內容</label>
+		                        <textarea class="form-control" id="editCSQADataContent" rows="3"></textarea>
+		                    </div>
+		                    <div class="form-group">
+		                        <label for="editCSQADataChack">狀態</label>
+		                        <select class="form-control" id="editCSQADataChack">
+		                            <option value="0">下架中</option>
+		                            <option value="1">上架中</option>
+		                        </select>
+		                    </div>
+		                </form>
+		            </div>
+		            <div class="modal-footer">
+		                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+		                <button type="button" class="btn btn-primary" id="saveEditButton" onclick="saveEdit()">儲存</button>
+		            </div>
+		        </div>
+		    </div>
+		</div>
+
+		<!-- script -->
+	   	<script src="/js/bootstrap.bundle.min.js"></script>
+	    <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
+
+		<script>
+		    // 定義 API 路徑
+		    const apiUrl = "http://localhost:8080/QA_manage/json";
+		
+		    // 獲取資料並顯示於表格
+		    $(document).ready(function () {
+		        loadData();
+		    });
+		
+		    // 載入資料並插入表格
+		    function loadData() {
+		        $.ajax({
+		            url: apiUrl,
+		            method: "GET",
+		            success: function (data) {
+		                let tableBody = $("#qaTable");
+		                // 清空表格內容
+		                tableBody.empty();
+		
+		                // 遍歷資料並插入表格
+		                data.forEach(item => {
+		                    const statusText = item.csqadataChack === 1 ? "上架中" : "下架中";
+		                    const row = `
+		                        <tr>
+		                            <td>${item.csqadataId}</td>
+		                            <td>${item.csqadataSort}</td>
+		                            <td>${item.csqadataTitle}</td>
+		                            <td>${item.csqadataContent}</td>
+		                            <td>${item.csqadataDATE}</td>
+		                            <td>${statusText}</td>
+		                            <td>
+		                                <button class="btn btn-success btn-sm" onclick="openEditModal(${item.csqadataId})">修改</button>
+		                            </td>
+		                        </tr>
+		                    `;
+		                    tableBody.append(row);
+		                });
+		            },
+		            error: function () {
+		                alert("資料載入失敗，請稍後再試！");
+		            }
+		        });
+		    }
+		
+		    // 開啟修改彈出框，並載入資料
+		    function openEditModal(CSQADataId) {
+		        $.ajax({
+		            url: `${apiUrl}/QADataId/${CSQADataId}`,
+		            method: "GET",
+		            success: function (data) {
+		                // 確保表單欄位的 ID 正確
+		                $("#editCSQADataId").val(data.csqadataId);
+		                $("#editCSQADataSort").val(data.csqadataSort);
+		                $("#editCSQADataTitle").val(data.csqadataTitle);
+		                $("#editCSQADataContent").val(data.csqadataContent);
+		                $("#editCSQADataChack").val(data.csqadataChack);
+		                $("#editModal").modal("show"); // 顯示彈出框
+		            },
+		            error: function () {
+		                alert("無法載入資料，請稍後再試！");
+		            }
+		        });
+		    }
+		
+		    // 儲存修改後的資料
+		    function saveEdit() {
+		    const id = $("#editCSQADataId").val();
+		    const updatedData = {
+		        csqadataSort: $("#editCSQADataSort").val(),
+		        csqadataTitle: $("#editCSQADataTitle").val(),
+		        csqadataContent: $("#editCSQADataContent").val(),
+		        csqadataChack: parseInt($("#editCSQADataChack").val())
+		    };
+		
+		    $.ajax({
+		    url: `http://localhost:8080/QA_manage/json/${id}`, // 使用動態 ID
+		    method: "PUT",
+		    contentType: "application/json", // 必須設置為 JSON 格式
+		    data: JSON.stringify({
+		        csqadataSort: $("#editCSQADataSort").val(),
+		        csqadataTitle: $("#editCSQADataTitle").val(),
+		        csqadataContent: $("#editCSQADataContent").val(),
+		        csqadataChack: $("#editCSQADataChack").val()
+		    }),
+		    success: function (response) {
+		        alert("修改成功！");
+		        location.reload(); // 刷新頁面
+		    },
+		    error: function (xhr, status, error) {
+		        alert(`儲存失敗：${xhr.statusText}`);
+		        console.error("詳細錯誤：", xhr);
+		    }
+		});
+		}
+		
+		
+		    // 新增資料
+		function addQAForm() {
+		    var formSort = document.getElementById("formSort").value;
+		    var formTitle = document.getElementById("formTitle").value;
+		    var formContent = document.getElementById("formContent").value;
+		
+		    if (!formSort || !formTitle || !formContent) {
+		        alert("請填寫所有欄位！");
+		        return;
+		    }
+		
+		    var data = {
+		        CSQADataSort: formSort,
+		        CSQADataTitle: formTitle,
+		        CSQADataContent: formContent
+		    };
+		
+		    fetch("/QA_manage/addQA", {
+		        method: 'POST',
+		        headers: {
+		            'Content-Type': 'application/json'
+		        },
+		        body: JSON.stringify(data)
+		    })
+		    .then(response => {
+		        if (!response.ok) {
+		            throw new Error('Network response was not ok');
+		        }
+		        return response.text();
+		    })
+		    .then(result => {
+		        alert(result);
+		        // 強制關閉模態框
+		        var modalElement = document.getElementById('addModal');
+		        var modal = bootstrap.Modal.getInstance(modalElement);
+		        if (modal) {
+		            modal.hide();
+		        }
+		        
+		        // 移除模態框遮罩
+		        var modalBackdrop = document.querySelector('.modal-backdrop');
+		        if (modalBackdrop) {
+		            modalBackdrop.remove();
+		        }
+		
+		        // 重置表單
+		        document.getElementById("addForm").reset();
+		        
+		        // 移除 body 上可能的類別
+		        document.body.classList.remove('modal-open');
+		    })
+		    .catch(error => {
+		        console.error('Error:', error);
+		        alert('新增失敗，請檢查您的輸入');
+		        
+		        // 即使出錯也嘗試關閉模態框
+		        var modalElement = document.getElementById('addModal');
+		        var modal = bootstrap.Modal.getInstance(modalElement);
+		        if (modal) {
+		            modal.hide();
+		        }
+		        
+		        // 移除模態框遮罩
+		        var modalBackdrop = document.querySelector('.modal-backdrop');
+		        if (modalBackdrop) {
+		            modalBackdrop.remove();
+		        }
+		        
+		        // 移除 body 上可能的類別
+		        document.body.classList.remove('modal-open');
+		    });
+		}
+		
+		// 儲存所有數據
+		let allData = [];
+		
+		// 修改 loadData 函數
+		function loadData() {
+		    $.ajax({
+		        url: apiUrl,
+		        method: "GET",
+		        success: function (data) {
+		            allData = data; // 儲存所有數據
+		            displayFilteredData(data); // 顯示數據
+		            
+		            // 添加分類選擇的事件監聽器
+		            $('#categoryFilter').on('change', function() {
+		                const selectedCategory = $(this).val();
+		                filterData(selectedCategory);
+		            });
+		        },
+		        error: function () {
+		            alert("資料載入失敗，請稍後再試！");
+		        }
+		    });
+		}
+		
+		// 新增過濾數據的函數
+		function filterData(category) {
+		    let filteredData;
+		    if (category === 'all') {
+		        filteredData = allData;
+		    } else {
+		        filteredData = allData.filter(item => item.csqadataSort === category);
+		    }
+		    displayFilteredData(filteredData);
+		}
+		
+		// 新增顯示過濾後數據的函數
+		 function displayFilteredData(data) {
+            let tableBody = $("#qaTable");
+            tableBody.empty();
+
+            data.forEach(item => {
+                const statusText = item.csqadataChack === 1 ? "上架中" : "下架中";
+                const dateString = item.csqadataDATE ? new Date(item.csqadataDATE).toLocaleDateString() : '';
+                const row = `
+                    <tr>
+                        <td>${item.csqadataId}</td>
+                        <td>${item.csqadataSort}</td>
+                        <td>${item.csqadataTitle}</td>
+                        <td>${item.csqadataContent}</td>
+                        <td>${dateString}</td>
+                        <td>${statusText}</td>
+                        <td>
+                            <button class="btn btn-success btn-sm" onclick="openEditModal(${item.csqadataId})">修改</button>
+                        </td>
+                    </tr>
+                `;
+                tableBody.append(row);
+            });
+        }
+		</script>
+
+
+</body>
+</html>

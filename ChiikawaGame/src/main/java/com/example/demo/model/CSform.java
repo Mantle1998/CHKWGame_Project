@@ -2,18 +2,14 @@ package com.example.demo.model;
 
 import java.util.Date;
 import java.util.List;
-
-import org.springframework.format.annotation.DateTimeFormat;
-
-import jakarta.persistence.CascadeType;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.PrimaryKeyJoinColumn;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
@@ -31,8 +27,8 @@ public class CSform {
     private Integer CSFormId;
     // 用於儲存表格中的 ID 欄位
 
-    // 指定 "CSFormSort" 欄位，必須是唯一且不可為空值
-    @Column(name = "CSFormSort", unique = true, nullable = false)
+    // 指定 "CSFormSort" 欄位，不可為空值
+    @Column(name = "CSFormSort", nullable = false)
     private String CSFormSort;
     // 用於儲存分類資訊
 
@@ -45,18 +41,32 @@ public class CSform {
     @Column(name = "CSFormContent", nullable = false)
     private String CSFormContent;
     // 用於儲存文章內容
-
-    // 使用 @DateTimeFormat 來指定日期格式，@Temporal 來指定資料庫中的時間型態
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") // 格式化日期為 yyyy-MM-dd HH:mm:ss
-    @Temporal(TemporalType.TIMESTAMP)
+    
+    
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone="GMT+8") // 只顯示日期，不顯示時間
+    @Column(name = "CSFormDate")
+    @Temporal(TemporalType.DATE)  // 設定為日期型態
     private Date CSFormDate;
     // 用於儲存文章建立的日期與時間
-
+    
     // 指定 "CSformChack" 欄位，不可為空值
-    @Column(name = "CSformChack", nullable = false)
-    private Integer CSformChack;
+    @Column(name = "CSFormChack")
+    private Integer CSFormChack;
     // 用於儲存文章的狀態（例如：0 表示未審核，1 表示已發布）
-
+    
+    // 指定 "CSFormContent" 欄位，不可為空值
+    @Column(name = "CSFormReply")
+    private String CSFormReply;
+    // 用於儲存回覆內容
+    
+    //串聯user資料表
+//    @ManyToOne
+//    @JoinColumn(name = "userId")  // 外鍵欄位
+//    private LoginBean UserId;
+    
+    @Column(name = "userId")
+    private Integer userId;
+    
     // 以下是 getter 和 setter 方法，用於取得和設定屬性值
 
     public Integer getCSFormId() {
@@ -99,18 +109,41 @@ public class CSform {
         this.CSFormDate = cSFormDate;
     }
 
-    public Integer getCSformChack() {
-        return CSformChack;
+    public Integer getCSFormChack() {
+        return CSFormChack;
     }
 
-    public void setCSformChack(Integer cSformChack) {
-        this.CSformChack = cSformChack;
+    public void setCSFormChack(Integer cSFormChack) {
+        this.CSFormChack = cSFormChack;
     }
+    
+    public String getCSFormReply() {
+        return CSFormReply;
+    }
+
+    public void setCSFormReply(String cSFormReply) {
+        this.CSFormReply = cSFormReply;
+    }
+    
 
 	public static void addAttribute(String string, List<CSform> csForms) {
 		// TODO Auto-generated method stub
 		
 	}
+	
+//    public LoginBean getUserId() {
+//        return UserId;
+//    }
+//
+//    public void setUserId(LoginBean userId) {
+//        this.UserId = userId;
+//    }
 
+	 public Integer getUserId() {
+	      return userId;
+	    }
 
+	 public void setUserId(Integer userId) {
+	      this.userId = userId;
+	    }
 }

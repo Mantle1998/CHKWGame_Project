@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="zh-hant-TW">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>消息中心</title>
+    <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet">
+    <link th:href="@{/css/custom.css}" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+    <script th:src="@{/js/jquery.min.js}"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+        }
+
+        .main-content {
+            display: flex;
+            height: 100vh;
+        }
+
+        .accordion-item {
+            margin-bottom: 10px;
+        }
+
+        .accordion-button {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .accordion-button span {
+            font-weight: bold;
+        }
+
+        .accordion-button .ms-auto {
+            font-size: 14px;
+            color: #6c757d;
+        }
+
+        .accordion-body {
+            font-size: 14px;
+            line-height: 1.6;
+            color: #343a40;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 引入 userHeader -->
+    <div th:replace="~{Customer_Service/layout/userHeader}"></div>
+
+    <!-- Flexbox -->
+    <div class="d-flex" style="height: 100vh;">
+        <!-- 引入側邊欄 -->
+        <div th:replace="~{Customer_Service/layout/memberCenterSidebar}"></div>
+
+        <!-- 主要內容 -->
+        <div id="mainContent" class="p-4">
+            <h2 class="form-title">消息中心</h2>
+            <div id="contentArea">
+                <div class="accordion" id="messageAccordion">
+                    <!-- 消息會動態插入這裡 -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- footer -->
+    <div th:replace="~{Customer_Service/html/footer}"></div>
+
+    <!-- script -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" 
+            integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" 
+            crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.js" 
+            integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" 
+            crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        function loadMessages() {
+            axios.get('/api/messages/user')
+                .then(function(response) {
+                    const messages = response.data;
+                    let contentHtml = '';
+
+                    messages.forEach(function(message) {
+                        contentHtml += `
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" 
+                                            data-bs-toggle="collapse" 
+                                            data-bs-target="#collapse${message.messageId}">
+                                        <span>${message.messageTitle}</span>
+                                        <span class="ms-auto">${formatDate(message.messageDate)}</span>
+                                    </button>
+                                </h2>
+                                <div id="collapse${message.messageId}" 
+                                     class="accordion-collapse collapse" 
+                                     data-bs-parent="#messageAccordion">
+                                    <div class="accordion-body">
+                                        ${message.messageContent}
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+
+                    document.querySelector('#messageAccordion').innerHTML = contentHtml;
+                })
+                .catch(function(error) {
+                    console.error('載入訊息失敗:', error);
+                    document.querySelector('#contentArea').innerHTML = 
+                        '<div class="alert alert-danger">載入訊息時發生錯誤</div>';
+                });
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('zh-TW', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit'
+            });
+        }
+
+        // 頁面載入時執行
+        $(document).ready(function() {
+            loadMessages();
+        });
+    </script>
+</body>
+</html>

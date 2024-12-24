@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+	<html lang="zh-hant-TW">
+		<head>
+		    <meta charset="UTF-8" />
+		    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		    <title>我的帳號</title>
+		    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+		    <style>
+		        body {
+		            margin: 0;
+		            padding: 0;
+		            font-family: Arial, sans-serif;
+		            background-color: #f4f4f4;
+		        }
+		
+		        .main-content {
+		            display: flex;
+		            height: 100vh;
+		                padding-top: 80px; /* 根據 Header 的高度進行調整 */
+		        }
+		
+		        .left-menu {
+		            width: 250px;
+		            background-color: #ffffff;
+		            padding: 20px;
+		            position: fixed;
+		            height: 100%;
+		            overflow-y: auto;
+		            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+		            z-index: 1000;
+		        }
+		
+		        .left-menu img {
+		            max-width: 100%;
+		            margin-bottom: 20px;
+		        }
+		
+		        .menu-item button {
+		            width: 100%;
+		            text-align: left;
+		            margin-bottom: 10px;
+		            padding: 10px;
+		            border: 1px solid #e0e0e0;
+		            background-color: #f9f9f9;
+		            transition: all 0.3s ease;
+		        }
+		
+		        .menu-item button:hover, .menu-item button.active {
+		            background-color: #007bff;
+		            color: white;
+		        }
+		
+		        .right-content {
+		            margin-left: 250px;
+		            padding: 20px;
+		            width: calc(100% - 250px);
+		            overflow-y: auto;
+		            background-color: #f8f9fa;
+		        }
+		
+		        .section {
+		            background-color: white;
+		            margin-bottom: 15px;
+		            border-radius: 5px;
+		            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+		        }
+		
+		        .section-header {
+		            cursor: pointer;
+		            padding: 15px;
+		            background-color: #e9ecef;
+		            border-bottom: 1px solid #dee2e6;
+		            font-weight: bold;
+		            display: flex;
+		            justify-content: space-between;
+		            align-items: center;
+		        }
+		
+		        .section-header::after {
+		            content: '▼';
+		            font-size: 12px;
+		            transition: transform 0.3s ease;
+		        }
+		
+		        .section-header.active::after {
+		            transform: rotate(180deg);
+		        }
+		
+		        .section-content {
+		            display: none;
+		            padding: 15px;
+		            background-color: #ffffff;
+		        }
+		
+		        .section-content small {
+		            color: #6c757d;
+		            display: block;
+		            margin-top: 10px;
+		        }
+		
+		        #category-title {
+		            margin-bottom: 20px;
+		            color: #343a40;
+		            border-bottom: 2px solid #007bff;
+		            padding-bottom: 10px;
+		        }
+		    </style>
+		</head>
+		
+		<body>
+			<!-- header -->
+			<div th:replace="~{layout/userHeader}"></div>
+		
+		    <div class="main-content">
+		        <!-- 左側選單 -->
+		        <div class="left-menu" id="leftMenu">
+		        
+		            <!-- 固定的左側選單項目 -->
+		            <div class="menu-item">
+		                <button data-category="帳號相關">帳號相關</button>
+		            </div>
+		            <div class="menu-item">
+		                <button data-category="平台守則">平台守則</button>
+		            </div>
+		            <div class="menu-item">
+		                <button data-category="買家相關">買家相關</button>
+		            </div>
+		            <div class="menu-item">
+		                <button data-category="賣家相關">賣家相關</button>
+		            </div>
+		            <div class="menu-item">
+		                <button data-category="其他問題">其他問題</button>
+		            </div>
+		        </div>
+		        
+		        <!-- 右側內容 -->
+		        <div class="right-content" id="rightContent">
+		            <h2 id="category-title">請於左側選單選擇一個類別</h2>
+		            <div id="content-container">
+		                <!-- 動態生成的內容將放在這裡 -->
+		            </div>
+		        </div>
+		    </div>
+		    
+		    <!-- footer -->
+			<div th:replace="~{Customer_Service/html/footer}"></div>
+		
+			<!-- script -->
+		   	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
+		    <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
+		    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+		    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+		    
+		    <script>
+		    
+		    document.addEventListener('DOMContentLoaded', function () {
+		        const leftMenu = document.getElementById('leftMenu');
+		        const rightContent = document.getElementById('rightContent');
+		        const contentContainer = document.getElementById('content-container');
+		        const categoryTitle = document.getElementById('category-title');
+		
+		        // 獲取 URL 中的分類參數
+		        const urlParams = new URLSearchParams(window.location.search);
+		        const initialCategory = urlParams.get('category'); // e.g., "account", "buyer", "seller"
+		
+		        // 從後端獲取分類及問題資料
+		        axios.get('http://localhost:8080/api/csqa/categories')
+		            .then(response => {
+		                const categories = response.data; // 從後端取得的資料
+		
+		                // 自動選擇對應的分類
+		                if (initialCategory && categories[initialCategory]) {
+		                    renderCategoryContent(initialCategory, categories[initialCategory]);
+		                    const targetButton = document.querySelector(`.menu-item button[data-category="${initialCategory}"]`);
+		                    if (targetButton) targetButton.classList.add('active');
+		                } else {
+		                    categoryTitle.textContent = '請選擇一個類別';
+		                }
+		
+		                // 為左側按鈕添加點擊事件
+		                document.querySelectorAll('.menu-item button').forEach(button => {
+		                    const category = button.getAttribute('data-category'); // 按鈕的類別
+		
+		                    button.addEventListener('click', () => {
+		                        // 移除所有按鈕的 active 樣式
+		                        document.querySelectorAll('.menu-item button').forEach(btn => {
+		                            btn.classList.remove('active');
+		                        });
+		
+		                        // 添加當前按鈕的 active 樣式
+		                        button.classList.add('active');
+		
+		                        // 獲取對應類別的數據
+		                        const categoryData = categories[category];
+		
+		                        // 處理空數據情況
+		                        if (!categoryData || categoryData.length === 0) {
+		                            contentContainer.innerHTML = '<p>目前尚無此類別的問題。</p>';
+		                            return;
+		                        }
+		
+		                        renderCategoryContent(category, categoryData);
+		                    });
+		                });
+		            })
+		            .catch(error => {
+		                categoryTitle.textContent = '加載類別出錯，請檢查網路連線';
+		            });
+		
+		        // 渲染右側內容
+		        function renderCategoryContent(category, data) {
+		            // 更新類別標題
+		            categoryTitle.textContent = category;
+		
+		            // 清空內容區域
+		            contentContainer.innerHTML = '';
+		
+		            // 為每個問題創建展開的區塊
+		            data.forEach(item => {
+		                const section = document.createElement('div');
+		                section.className = 'section';
+		                section.innerHTML = `
+		                    <div class="section-header">${item.csqadataTitle}</div>
+		                    <div class="section-content">
+		                        <p>${item.csqadataContent}</p>
+		                        <small>更新日期：${new Date(item.csqadataDATE).toLocaleDateString()}</small>
+		                    </div>
+		                `;
+		
+		                // 設置展開/收起功能
+		                const header = section.querySelector('.section-header');
+		                const content = section.querySelector('.section-content');
+		
+		                header.addEventListener('click', () => {
+		                    // 切換當前內容顯示
+		                    const isVisible = content.style.display === 'block';
+		
+		                    // 關閉其他展開的內容
+		                    document.querySelectorAll('.section-content').forEach(el => {
+		                        if (el !== content) {
+		                            el.style.display = 'none';
+		                            el.previousElementSibling.classList.remove('active');
+		                        }
+		                    });
+		
+		                    // 切換當前內容
+		                    content.style.display = isVisible ? 'none' : 'block';
+		                    header.classList.toggle('active', !isVisible);
+		                });
+		
+		                contentContainer.appendChild(section);
+		            });
+		        }
+		    });
+			</script>
+	
+		</body>
+	</html>

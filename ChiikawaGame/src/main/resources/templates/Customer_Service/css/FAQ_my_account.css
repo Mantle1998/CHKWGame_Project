@@ -1,0 +1,184 @@
+body {
+    font-family: Arial, sans-serif; /* 設定頁面字體為 Arial，若無則使用 sans-serif */
+    background-color: #f7f7f7; /* 設定頁面背景顏色為淺灰色 */
+    text-align: center; /* 設定文本對齊方式為置中 */
+}
+
+.header {
+    background-color: #3a6ed5; /* 設定標頭背景顏色為藍色 */
+    padding: 20px; /* 標頭內部上下填充為 20 像素 */
+    color: white; /* 設定標頭文字顏色為白色 */
+    display: flex; /* 使用彈性布局 */
+    align-items: center; /* 垂直置中對齊 */
+}
+
+.home-button {
+    padding: 10px 20px; /* 設定按鈕內部填充 */
+    font-size: 16px; /* 設定按鈕文字大小 */
+    background-color: #3a6ed5; /* 設定按鈕背景顏色為藍色 */
+    color: white; /* 設定按鈕文字顏色為白色 */
+    border: none; /* 去掉按鈕邊框 */
+    border-radius: 5px; /* 設定按鈕邊角為 5 像素的圓角 */
+    cursor: pointer; /* 設定滑鼠懸停時顯示為可點擊的手形光標 */
+    margin-right: 20px; /* 設定按鈕右側外邊距 */
+    transition: background-color 0.2s ease; /* 添加過渡效果 */
+}
+
+.home-button:hover {
+    background-color: #224baf; /* 當滑鼠懸停時改變背景顏色 */
+}
+
+.header-content {
+    flex: 1; /* 使內容區域自動擴展以填滿剩餘空間 */
+    display: flex; /* 使用彈性布局保持標題和搜尋框的排版 */
+    flex-direction: column; /* 使內容垂直排列 */
+    align-items: center; /* 內容水平置中 */
+}
+
+.header-content h1 {
+    margin: 0; /* 去掉標題的外邊距 */
+}
+
+.header-content input {
+    margin-top: 10px; /* 為搜尋框增加上方外邊距 */
+}
+
+.header-content button {
+    margin-top: 10px; /* 為搜尋按鈕增加上方外邊距 */
+}
+
+.header input {
+    padding: 10px; /* 輸入框內部填充為 10 像素 */
+    font-size: 16px; /* 設定輸入框文字大小為 16 像素 */
+    width: 60%; /* 輸入框寬度為容器的 60% */
+    max-width: 300px; /* 輸入框最大寬度為 300 像素 */
+    border: none; /* 去掉輸入框邊框 */
+    border-radius: 5px; /* 設定輸入框邊角為 5 像素的圓角 */
+}
+
+.header button {
+    padding: 10px 20px; /* 設定按鈕內部上下填充為 10 像素，左右為 20 像素 */
+    font-size: 16px; /* 設定按鈕文字大小為 16 像素 */
+    border: none; /* 去掉按鈕邊框 */
+    background-color: #224baf; /* 設定按鈕背景顏色為深藍色 */
+    color: white; /* 設定按鈕文字顏色為白色 */
+    border-radius: 5px; /* 設定按鈕邊角為 5 像素的圓角 */
+    cursor: pointer; /* 設定滑鼠懸停時顯示為可點擊的手形光標 */
+}
+
+.main-content {
+    display: flex; /* 設定主內容使用彈性布局 */
+    max-width: 1200px; /* 設定主內容的最大寬度為 1200 像素 */
+    margin: 20px auto; /* 設定主內容上下外邊距為 20 像素，左右自動對齊 */
+    text-align: left; /* 設定主內容文本對齊方式為左對齊 */
+}
+
+.left-menu {
+    width: 30%; /* 左側選單寬度為 30% */
+    padding: 20px; /* 左側選單內部填充為 20 像素 */
+    background-color: white; /* 設定左側選單背景顏色為白色 */
+    border-right: 1px solid #ddd; /* 設定右邊邊框為 1 像素的淺灰色實線 */
+}
+
+.left-menu img {
+    width: 50px; /* 左側選單圖片寬度為 50 像素 */
+    height: 50px; /* 左側選單圖片高度為 50 像素 */
+    margin-bottom: 20px; /* 設定圖片下方外邊距為 20 像素 */
+}
+
+.menu-item {
+    margin-bottom: 10px; /* 設定選單項目下方外邊距為 10 像素 */
+}
+
+.menu-item button {
+    width: 100%; /* 按鈕寬度為 100% */
+    padding: 10px; /* 設定按鈕內部填充為 10 像素 */
+    font-size: 18px; /* 設定按鈕文字大小為 18 像素 */
+    background-color: #f7f7f7; /* 設定按鈕背景顏色為淺灰色 */
+    border: 1px solid #ddd; /* 設定按鈕邊框為 1 像素的淺灰色實線 */
+    border-radius: 5px; /* 設定按鈕邊角為 5 像素的圓角 */
+    cursor: pointer; /* 設定滑鼠懸停時顯示為可點擊的手形光標 */
+    text-align: left; /* 設定按鈕內部文字左對齊 */
+}
+
+.menu-item button:hover {
+    background-color: #e2e2e2; /* 當滑鼠懸停在按鈕上時，改變背景顏色為較深的灰色 */
+}
+
+.right-content {
+    width: 70%; /* 右側內容區域寬度為 70% */
+    padding: 20px; /* 右側內容區域內部填充為 20 像素 */
+}
+
+.right-content h2 {
+    font-size: 24px; /* 設定標題文字大小為 24 像素 */
+    margin-bottom: 10px; /* 設定標題下方外邊距為 10 像素 */
+}
+
+.right-content ul {
+    list-style-type: none; /* 移除列表項目的預設樣式 */
+    padding: 0; /* 移除列表的內部填充 */
+}
+
+.right-content ul li {
+    margin-bottom: 10px; /* 設定列表項目下方外邊距為 10 像素 */
+    font-size: 18px; /* 設定列表項目文字大小為 18 像素 */
+}
+
+.right-content ul li button {
+    background: none; /* 去掉按鈕背景 */
+    border: none; /* 去掉按鈕邊框 */
+    font-size: 18px; /* 設定按鈕文字大小為 18 像素 */
+    text-align: left; /* 設定按鈕內部文字左對齊 */
+    width: 100%; /* 按鈕寬度為 100% */
+    cursor: pointer; /* 設定滑鼠懸停時顯示為可點擊的手形光標 */
+    padding: 10px; /* 設定按鈕內部填充為 10 像素 */
+}
+
+.right-content ul li button:hover {
+    color: #3a6ed5; /* 當滑鼠懸停在按鈕上時，改變文字顏色為藍色 */
+}
+
+.content {
+    display: none; /* 設定內容區域為不顯示 */
+    margin-left: 20px; /* 設定內容區域左邊外邊距為 20 像素 */
+    font-size: 16px; /* 設定內容文字大小為 16 像素 */
+}
+
+.right-content ul li button {
+    background: none; /* 去掉按鈕背景 */
+    border: none; /* 去掉按鈕邊框 */
+    font-size: 18px; /* 設定按鈕文字大小為 18 像素 */
+    text-align: left; /* 設定按鈕內部文字左對齊 */
+    width: 100%; /* 按鈕寬度為 100% */
+    cursor: pointer; /* 設定滑鼠懸停時顯示為可點擊的手形光標 */
+    padding: 10px; /* 設定按鈕內部填充為 10 像素 */
+    transition: transform 0.2s ease, color 0.2s ease; /* 添加過渡效果，變化持續時間為 0.2 秒 */
+}
+
+.right-content ul li button:hover {
+    color: #3a6ed5; /* 當滑鼠懸停在按鈕上時，改變文字顏色為藍色 */
+    transform: scale(1.05); /* 當滑鼠懸停時，按鈕放大 5% */
+}
+
+.left-menu .menu-item button {
+    width: 100%; /* 按鈕寬度為 100% */
+    padding: 10px; /* 設定按鈕內部填充為 10 像素 */
+    font-size: 18px; /* 設定按鈕文字大小為 18 像素 */
+    background-color: #f7f7f7; /* 設定按鈕背景顏色為淺灰色 */
+    border: 1px solid #ddd; /* 設定按鈕邊框為 1 像素的淺灰色實線 */
+    border-radius: 5px; /* 設定按鈕邊角為 5 像素的圓角 */
+    cursor: pointer; /* 設定滑鼠懸停時顯示為可點擊的手形光標 */
+    text-align: left; /* 設定按鈕內部文字左對齊 */
+    transition: transform 0.2s ease, background-color 0.2s ease; /* 添加過渡效果 */
+}
+
+.left-menu .menu-item button:hover {
+    background-color: #e2e2e2; /* 當滑鼠懸停在按鈕上時，改變背景顏色為較深的灰色 */
+    transform: scale(1.05); /* 當滑鼠懸停時，按鈕放大 5% */
+}
+
+
+
+
+

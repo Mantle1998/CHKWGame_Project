@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet">
+    <title>客服表單管理</title>
+</head>
+<body>
+    <div th:replace="~{Customer_Service/html/saHeader}"></div>
+    
+    <h1 class="text-center">
+	    	<span class="btn header-btn" style="font-size: 25px;">客服表單管理</span>
+	</h1>
+    
+    <div class="container mt-4">
+        <h2>查詢列表</h2>
+        <div class="mb-4" style="display: flex; gap: 10px; align-items: center;">
+            <label for="searchInput" style="flex-shrink: 0;">搜尋表單:</label>
+            <input type="text" id="searchInput" class="form-control" style="flex-grow: 1;" placeholder="可輸入表單ID、問題分類、問題標題、問題內容來查詢">
+            <button class="btn btn-primary" onclick="searchReview()" style="flex-shrink: 0;flex-grow: 1;">搜尋</button>
+        </div>
+
+        <div class="mb-4">
+            <h2>表單列表</h2>
+            <table id="faTable" class="table table-striped">
+                <thead>
+                    <tr>
+                        <th style="width:10%">表單ID</th>
+                        <th style="width:10%">問題分類</th>
+                        <th style="width:10%">問題標題</th>
+                        <th style="width:20%">問題內容</th>
+                        <th style="width:15%">提交時間</th>
+                        <th style="width:10%">目前狀態</th>
+                        <th style="width:15%">回覆</th>
+                    </tr>
+                </thead>
+                <tbody id="listform">
+                    <!-- 資料將通過 JavaScript 動態插入 -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- 修改視窗 -->
+    <div class="modal fade" id="replyModal" tabindex="-1" aria-labelledby="replyModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="replyModalLabel">回覆表單</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="replyForm">
+                        <input type="hidden" id="CSFormId"> <!-- 對應表單 ID -->
+                        <div class="mb-3">
+                            <label for="CSFormReply" class="form-label">回覆內容</label>
+                            <textarea class="form-control" id="CSFormReply" rows="3"></textarea> <!-- 回覆內容 -->
+                        </div>
+                        <div class="mb-3">
+                            <label for="CSFormChack" class="form-label">目前狀態</label>
+                            <select class="form-control" id="CSFormChack">
+                                <option value="1">已完成</option>
+                                <option value="0">待處理</option>
+                            </select> <!-- 狀態選擇 -->
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
+                    <button type="button" class="btn btn-primary" onclick="submitReply()">送出</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="~{Customer_Service/html/footer}"></div>
+
+    <script src="/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
+    <script>
+    		// 定義 API 路徑
+			const apiUrl = "http://localhost:8080/form_manage/json";
+        	$(document).ready(function () {
+        	
+            // 從後端獲取 JSON 資料
+            $.ajax({
+                url: apiUrl, // API 的 URL
+                method: "GET",
+                success: function (data) {
+                    let tableBody = $("#listform");
+                    tableBody.empty(); // 清空表格內容
+
+                    data.forEach(form => {
+                        const status = form.csformChack === 1 ? "已完成" : "待處理";
+                        const row = `
+                            <tr>
+                                <td>${form.csformId}</td>
+                                <td>${form.csformSort}</td>
+                                <td>${form.csformTitle}</td>
+                                <td>${form.csformContent}</td>
+                                <td>${form.csformDate}</td>
+                                <td>${status}</td>
+                                <td>
+                                    <button class="btn btn-success btn-sm" onclick="openReplyModal(${form.csformId}, ${form.csformChack})">回覆</button>
+                                </td>
+                            </tr>
+                        `;
+                        tableBody.append(row);
+                    });
+                },
+                error: function (error) {
+                    console.error("無法取得資料", error);
+                }
+            });
+        });
+
+        // 開啟回覆視窗並填充資料
+        function openReplyModal(csformId, csformChack) {
+            // 填充模態視窗中的表單資料
+            $("#CSFormId").val(csformId);
+            $("#CSFormChack").val(csformChack);
+
+            // 清空回覆內容
+            $("#CSFormReply").val("");
+
+            // 顯示模態視窗
+            $("#replyModal").modal("show");
+        }
+
+        // 提交回覆資料
+        function submitReply() {
+            const CSFormId = $("#CSFormId").val();
+            const CSFormReply = $("#CSFormReply").val();
+            const CSFormChack = $("#CSFormChack").val();
+
+            if (!CSFormReply.trim()) {
+                alert("回覆內容不可為空！");
+                return;
+            }
+
+		$.ajax({
+		    url: "http://localhost:8080/submitReply",
+		    method: "POST",
+		    data: {
+		        CSFormId: CSFormId,
+		        CSFormReply: CSFormReply,
+		        CSFormChack: CSFormChack
+		    },
+		    success: function(response) {
+		        console.log("回覆成功:", response);
+		        $("#replyModal").modal("hide");
+		        location.reload(); // 刷新頁面以反映更新
+		    },
+		    error: function(error) {
+		        console.error("回覆失敗", error);
+		        alert("回覆失敗，請稍後再試！");
+		    }
+		});
+		
+		
+		// 提交新增表單資料
+function submitNewForm() {
+    const newFormSort = $("#newFormSort").val().trim();
+    const newFormTitle = $("#newFormTitle").val().trim();
+    const newFormContent = $("#newFormContent").val().trim();
+
+    if (!newFormSort || !newFormTitle || !newFormContent) {
+        alert("所有欄位均為必填！");
+        return;
+    }
+
+    $.ajax({
+        url: "http://localhost:8080/addForm", // 替換為您的後端 API
+        method: "POST",
+        data: {
+            csformSort: newFormSort,
+            csformTitle: newFormTitle,
+            csformContent: newFormContent,
+        },
+        success: function (response) {
+            console.log("新增成功:", response);
+            $("#addFormModal").modal("hide");
+            location.reload(); // 刷新頁面以更新資料
+        },
+        error: function (error) {
+            console.error("新增失敗", error);
+            alert("新增失敗，請稍後再試！");
+        }
+    });
+}
+		
+        }
+    </script>
+</body>
+</html>
