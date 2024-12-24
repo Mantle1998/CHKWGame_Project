@@ -266,7 +266,7 @@ public class ReviewController {
 	// 計算某賣家的總評論數量
 	// http://localhost:8080/reviews/count/201
     @GetMapping("/count/{reviewSellerId}")
-    public ResponseEntity<Integer> countReviews(@PathVariable long reviewSellerId) {
+    public ResponseEntity<Integer> countReviews(@PathVariable Integer reviewSellerId) {
         int reviewCount = reviewService.countReviewsBySellerId(reviewSellerId);
         return ResponseEntity.ok(reviewCount);
     }

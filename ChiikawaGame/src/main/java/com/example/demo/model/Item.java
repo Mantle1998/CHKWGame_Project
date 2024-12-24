@@ -63,7 +63,7 @@ public class Item {
     private Brand brand;
 
     // 商品圖片
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "item", orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "item")
     @JsonIgnore
     private List<ItemPhoto> itemPhoto = new ArrayList<>();
 

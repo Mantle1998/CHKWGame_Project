@@ -149,7 +149,7 @@ public class ReviewService {
     }
     
     //計算某賣家的總評論數量
-    public int countReviewsBySellerId(Long reviewSellerId) {
+    public int countReviewsBySellerId(Integer reviewSellerId) {
         return reviewRepository.countByReviewSellerId(reviewSellerId);
     }
     

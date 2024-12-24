@@ -122,6 +122,8 @@ public class ItemService {
 	    // 處理圖片
 	    if (files != null && files.length > 0) {
 	        // 新增新圖片並設定排序
+	    	
+	    	itemPhotoRepo.deleteByItem_ItemId(item.getItemId());
 	        for (int i = 0; i < files.length; i++) {
 	            MultipartFile file = files[i];
 	            if (!file.isEmpty()) {
