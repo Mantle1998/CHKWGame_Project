@@ -31,7 +31,7 @@ public class RegisterController {
     	if(session.getAttribute("user") != null) {
     		return "redirect:/memberCenter";// 可以根據需求修改重定向的頁面
     	}
-        return "register";  // 返回register.html頁面
+        return "/loginOut/register";  // 返回register.html頁面
     }
 	
  // 處理註冊表單

@@ -31,11 +31,11 @@ public class LoginController {
     	// 檢查 session 中是否有 user 資料，表示用戶已經登入
     	if(session.getAttribute("user") != null) {
     		// 如果已經登入，重定向到首頁（或其他頁面）
-    		return "/memberCenter/MemberCenter";// 可以根據需求修改重定向的頁面
+    		return "/memberCenter/memberCenter";// 可以根據需求修改重定向的頁面
     	}
     	
     	// 如果沒有登入，顯示登入頁面
-    	return "login";  // 返回login.html頁面
+    	return "/loginOut/login";  // 返回login.html頁面
     }
     
     @GetMapping("/loginAdmin")
@@ -43,11 +43,11 @@ public class LoginController {
     	// 檢查 session 中是否有 user 資料，表示用戶已經登入
     	if(session.getAttribute("user") != null) {
     		// 如果已經登入，重定向到首頁（或其他頁面）
-    		return "redirect:/memberCenterAdmin";// 可以根據需求修改重定向的頁面
+    		return "redirect:/saInfo";// 可以根據需求修改重定向的頁面
     	}
     	
     	// 如果沒有登入，顯示登入頁面
-    	return "loginAdmin";  // 返回login.html頁面
+    	return "/loginOut/loginAdmin";  // 返回login.html頁面
     }
 
 	
@@ -89,6 +89,7 @@ public class LoginController {
         }
     }
     
+    //saLogin
     @PostMapping("/loginAdmin")
     @ResponseBody
     public ResponseEntity<String> loginAdmin(@RequestBody LoginBean loginDetails, HttpSession session) {
@@ -134,20 +135,20 @@ public class LoginController {
             return "redirect:/login"; // 可以根據需求修改重定向的頁面
         }
         // 如果 session 中有 user，則顯示會員中心頁面
-        return "memberCenter"; // 返回對應的 Thymeleaf 模板名稱
+        return "/memberCenter/memberCenter"; // 返回對應的 Thymeleaf 模板名稱
     }
 
     
  
     
- // 顯示管理員中心頁面
+ // 顯示管理員中心頁面 組長 你這頁面好像沒做登出 2024/12/24 16:13 by KU
     @GetMapping("/memberCenterAdmin")
     public String showMemberCenterAdminPage(HttpSession session) {
     	if (session.getAttribute("user") == null) {
             // 如果 session 中沒有 user，則重定向到登入頁面
             return "redirect:/loginAdmin"; // 可以根據需求修改重定向的頁面
         }
-        return "MemberCenterAdmin";
+        return "saInfo";
     }
     
  // 獲取用戶資訊
@@ -174,7 +175,7 @@ public class LoginController {
             session.invalidate();
         }
 		// 重定向到登入頁面
-        return "redirect:/login"; // 重定向到登入頁面
+        return "redirect:/loginOut/login"; // 重定向到登入頁面
 	}
     
   //登出
@@ -187,7 +188,7 @@ public class LoginController {
             session.invalidate();
         }
 		// 重定向到登入頁面
-        return "redirect:/loginAdmin"; // 重定向到登入頁面
+        return "redirect:/loginOut/loginAdmin"; // 重定向到登入頁面
 	}
     
     

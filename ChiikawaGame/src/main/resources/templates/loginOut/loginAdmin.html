@@ -312,7 +312,7 @@
     data: JSON.stringify({ userEmail: userEmail, userPassword: userPassword }),
     success: function(response) {
         console.log("Login successful:", response);
-        window.location.href = '/memberCenterAdmin';  // 登入成功後跳轉到會員中心
+        window.location.href = '/saInfo';  // 登入成功後跳轉到會員中心
     },
     error: function(xhr, status, error) {
         var errorMessage = '登入失敗，請稍後再試'; // 預設錯誤訊息
