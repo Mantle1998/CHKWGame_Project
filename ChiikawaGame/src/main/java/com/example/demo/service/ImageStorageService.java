@@ -26,6 +26,12 @@ public class ImageStorageService {
         }
 
         try {
+            // 檢查檔案類型
+            String contentType = file.getContentType();
+            if (contentType == null || !contentType.startsWith("image/")) {
+                throw new RuntimeException("File must be an image");
+            }
+        	
             // 產生唯一檔案名
             String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
             Path targetLocation = Paths.get(uploadDirectory).resolve(fileName);
@@ -43,6 +49,9 @@ public class ImageStorageService {
         }
     }
     
+    // 添加 getter 方法
+    public String getUploadDirectory() {
+        return uploadDirectory;
+    }
     
 }
-

@@ -50,13 +50,13 @@ public class Reviews {
     private OrderItem orderItem;
     
 	@Column(name = "reviewItemId")
-	private long reviewItemId;
+	private int reviewItemId;
 	
 	@Column(name = "reviewSellerId")
-	private long reviewSellerId;
+	private int reviewSellerId;
 	
 	@Column(name = "reviewBuyerId")
-	private long reviewBuyerId;
+	private int reviewBuyerId;
 	
 	@JsonIgnore
 	@OneToMany(mappedBy = "reviews")
@@ -132,7 +132,7 @@ public class Reviews {
 		return reviewItemId;
 	}
 
-	public void setReviewItemId(long reviewItemId) {
+	public void setReviewItemId(int reviewItemId) {
 		this.reviewItemId = reviewItemId;
 	}
 
@@ -140,7 +140,7 @@ public class Reviews {
 		return reviewSellerId;
 	}
 
-	public void setReviewSellerId(long reviewSellerId) {
+	public void setReviewSellerId(int reviewSellerId) {
 		this.reviewSellerId = reviewSellerId;
 	}
 
@@ -148,7 +148,7 @@ public class Reviews {
 		return reviewBuyerId;
 	}
 
-	public void setReviewBuyerId(long reviewBuyerId) {
+	public void setReviewBuyerId(int reviewBuyerId) {
 		this.reviewBuyerId = reviewBuyerId;
 	}
 

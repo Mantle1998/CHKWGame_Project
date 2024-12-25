@@ -77,7 +77,7 @@ public class HomePageController {
 	// 顯示商城首頁頁面 (http://localhost:8080/homePage)
     @GetMapping("/homePage")
     public String showhomePage() {
-        return "homePage";
+        return "homePage/homePage";
     }
     
     // 顯示商城搜尋頁面 (http://localhost:8080/itemSearch)
@@ -97,7 +97,7 @@ public class HomePageController {
 
         model.addAttribute("items", items);
         model.addAttribute("keyword", keyword);
-        return "itemSearch";
+        return "homePage/itemSearch";
     }
     
     
@@ -300,7 +300,7 @@ public class HomePageController {
         model.addAttribute("reviews", reviews);                // 商品的
         model.addAttribute("sellerTotalReviews", sellerTotalReviews); // 賣家的
 
-        return "itemDisplay"; 
+        return "/homePage/itemDisplay"; 
     }
     
     
