@@ -213,7 +213,7 @@ public class HomePageController {
         model.addAttribute("items", items); // 傳送查詢結果到前端
         model.addAttribute("keyword", brandName); // 傳遞品牌名稱作為搜尋關鍵字
 
-        return "itemSearch"; // 返回搜尋結果頁面
+        return "homePage/itemSearch"; // 返回搜尋結果頁面
     }
     
     

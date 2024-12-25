@@ -72,7 +72,7 @@ public class SellerInfoController {
         // 6. 把 userId 也放到 model，以便前端後續呼叫
         model.addAttribute("userId", userId);
 
-        return "sellerInfo"; // 返回賣家資訊頁面的 Thymeleaf 模板
+        return "homePage/sellerInfo"; // 返回賣家資訊頁面的 Thymeleaf 模板
     }
 
     @RestController
