@@ -63,7 +63,14 @@
           <tr>
               <td><label for="newAdName">廣告名稱</label><input type="text" id="newAdName" class="form-control" placeholder="廣告名稱"></td>
               <td><label for="newAdInfo">廣告敘述</label><input type="text" id="newAdInfo" class="form-control" placeholder="廣告敘述"></td>
-              <td><label for="newAdImage">廣告圖片</label><input type="file" id="newAdImage" class="form-control" onchange="openCropper(this)"></td>
+              <td>
+                  <label for="newAdImage">廣告圖片</label>
+                  <div class="image-container">
+                      <img id="newAdPreview" src="#" alt="預覽圖片" style="display: none;">
+                      <button class="btn btn-secondary" onclick="triggerAddFileInput()">選擇圖片</button>
+                  </div>
+                  <input type="file" id="newAdImage" class="form-control" style="display: none;" onchange="openCropper(this, 'add')">
+              </td>
               <td><button class="btn btn-primary mt-4" onclick="addAd()">新增</button></td>
           </tr>
       </table>
@@ -110,195 +117,226 @@
   <script src="https://unpkg.com/cropperjs/dist/cropper.js"></script>
   <script>
      let allAds = [];
-let cropper;
-let currentFileInput;
+     let cropper;
+     let addCropperFileInput = null;    // 用於新增廣告
+     let updateCropperFileInput = null; // 用於更新廣告
 
-document.addEventListener("DOMContentLoaded", loadAdInfo);
+     document.addEventListener("DOMContentLoaded", loadAdInfo);
 
-function loadAdInfo() {
-    fetch("/adInfo/json")
-        .then(response => response.json())
-        .then(data => {
-            allAds = data;
-            displayAds(allAds);
-        })
-        .catch(error => console.error("Error:", error));
-}
+     function loadAdInfo() {
+         fetch("/adInfo/json")
+             .then(response => response.json())
+             .then(data => {
+                 allAds = data;
+                 displayAds(allAds);
+             })
+             .catch(error => console.error("錯誤:", error));
+     }
 
-function displayAds(ads) {
-    const tableBody = document.getElementById("adTableBody");
-    tableBody.innerHTML = "";
+     function displayAds(ads) {
+         const tableBody = document.getElementById("adTableBody");
+         tableBody.innerHTML = "";
 
-    if (ads.length === 0) {
-        tableBody.innerHTML = `
-            <tr>
-                <td colspan="5" class="text-center">沒有符合條件的廣告資料。</td>
-            </tr>
-        `;
-        return;
-    }
+         if (ads.length === 0) {
+             tableBody.innerHTML = `
+                 <tr>
+                     <td colspan="5" class="text-center">沒有符合條件的廣告資料。</td>
+                 </tr>
+             `;
+             return;
+         }
 
-    ads.forEach(ad => {
-        const row = `
-            <tr>
-                <td>${ad.adId}</td>
-                <td><input type="text" class="form-control ad-name" value="${ad.adName}"></td>
-                <td><input type="text" class="form-control ad-info" value="${ad.adInfo}"></td>
-                <td>
-                    <div class="image-container">
-                        <img src="data:image/jpeg;base64,${ad.adImageBase64}" alt="廣告圖片">
-                        <button class="btn btn-secondary" onclick="triggerFileInput(${ad.adId})">更換圖片</button>
-                    </div>
-                    <input type="file" class="form-control ad-image" id="file-${ad.adId}" style="display: none;" onchange="openCropper(this)">
-                </td>
-                <td><button class="btn btn-success" onclick="updateAd(${ad.adId}, this)">儲存</button></td>
-            </tr>
-        `;
-        tableBody.insertAdjacentHTML("beforeend", row);
-    });
-}
+         ads.forEach(ad => {
+             const row = `
+                 <tr>
+                     <td>${ad.adId}</td>
+                     <td><input type="text" class="form-control ad-name" value="${ad.adName}"></td>
+                     <td><input type="text" class="form-control ad-info" value="${ad.adInfo}"></td>
+                     <td>
+                         <div class="image-container">
+                             <img src="data:image/jpeg;base64,${ad.adImageBase64}" alt="廣告圖片">
+                             <button class="btn btn-secondary" onclick="triggerFileInput(${ad.adId})">更換圖片</button>
+                         </div>
+                         <input type="file" class="form-control ad-image" id="file-${ad.adId}" style="display: none;" onchange="openCropper(this, 'update')">
+                     </td>
+                     <td><button class="btn btn-success" onclick="updateAd(${ad.adId}, this)">儲存</button></td>
+                 </tr>
+             `;
+             tableBody.insertAdjacentHTML("beforeend", row);
+         });
+     }
 
-function performSearch() {
-    const adName = document.getElementById("searchAdName").value.trim().toLowerCase();
-    const adInfo = document.getElementById("searchAdInfo").value.trim().toLowerCase();
+     function performSearch() {
+         const adName = document.getElementById("searchAdName").value.trim().toLowerCase();
+         const adInfo = document.getElementById("searchAdInfo").value.trim().toLowerCase();
 
-    const filteredAds = allAds.filter(ad => {
-        const matchesName = adName === "" || ad.adName.toLowerCase().includes(adName);
-        const matchesInfo = adInfo === "" || ad.adInfo.toLowerCase().includes(adInfo);
-        return matchesName && matchesInfo;
-    });
+         const filteredAds = allAds.filter(ad => {
+             const matchesName = adName === "" || ad.adName.toLowerCase().includes(adName);
+             const matchesInfo = adInfo === "" || ad.adInfo.toLowerCase().includes(adInfo);
+             return matchesName && matchesInfo;
+         });
 
-    displayAds(filteredAds);
-}
+         displayAds(filteredAds);
+     }
 
-function resetSearch() {
-    document.getElementById("searchAdName").value = "";
-    document.getElementById("searchAdInfo").value = "";
-    displayAds(allAds);
-}
+     function resetSearch() {
+         document.getElementById("searchAdName").value = "";
+         document.getElementById("searchAdInfo").value = "";
+         displayAds(allAds);
+     }
 
-function openCropper(input) {
-    const file = input.files[0];
-    if (file) {
-        currentFileInput = input;
-        const reader = new FileReader();
-        reader.onload = function (e) {
-            const cropperImage = document.getElementById("cropperImage");
-            cropperImage.src = e.target.result;
-            if (cropper) {
-                cropper.destroy();
-            }
-            cropper = new Cropper(cropperImage, {
-                aspectRatio: 3 / 1,
-                viewMode: 1,
-                autoCropArea: 1,
-                dragMode: 'move'
-            });
-            const modal = new bootstrap.Modal(document.getElementById("cropperModal"));
-            modal.show();
-        };
-        reader.readAsDataURL(file);
-    }
-}
+     function openCropper(input, type) {
+         const file = input.files[0];
+         if (file) {
+             if (type === 'add') {
+                 addCropperFileInput = input;
+                 updateCropperFileInput = null; // 重置更新輸入
+             } else if (type === 'update') {
+                 updateCropperFileInput = input;
+                 addCropperFileInput = null; // 重置新增輸入
+             }
 
-function cropAndSetImage() {
-    if (cropper) {
-        const canvas = cropper.getCroppedCanvas({
-            width: 1300,
-            height: 433
-        });
+             const reader = new FileReader();
+             reader.onload = function (e) {
+                 const cropperImage = document.getElementById("cropperImage");
+                 cropperImage.src = e.target.result;
+                 if (cropper) {
+                     cropper.destroy();
+                 }
+                 cropper = new Cropper(cropperImage, {
+                     aspectRatio: 3 / 1,
+                     viewMode: 1,
+                     autoCropArea: 1,
+                     dragMode: 'move'
+                 });
+                 const modal = new bootstrap.Modal(document.getElementById("cropperModal"));
+                 modal.show();
+             };
+             reader.readAsDataURL(file);
+         }
+     }
 
-        canvas.toBlob(blob => {
-            // 創建一個新的 File 對象，包含文件名稱和 MIME 類型
-            const croppedFile = new File([blob], "cropped.jpg", { type: "image/jpeg" });
+     function cropAndSetImage() {
+         if (cropper) {
+             const canvas = cropper.getCroppedCanvas({
+                 width: 1300,
+                 height: 433
+             });
 
-            // 更新預覽圖片
-            const url = URL.createObjectURL(croppedFile);
-            const container = currentFileInput.parentElement.querySelector('.image-container');
-            const previewImage = container.querySelector('img');
-            previewImage.src = url;
+             canvas.toBlob(blob => {
+                 const croppedFile = new File([blob], "cropped.jpg", { type: "image/jpeg" });
 
-            // 將裁切後的文件存儲在 currentFileInput 的自定義屬性中
-            currentFileInput.croppedFile = croppedFile;
-        }, "image/jpeg");
+                 const url = URL.createObjectURL(croppedFile);
 
-        // 關閉裁切模態框
-        const modal = bootstrap.Modal.getInstance(document.getElementById("cropperModal"));
-        modal.hide();
-    }
-}
+                 if (addCropperFileInput) {
+                     const container = addCropperFileInput.parentElement.querySelector('.image-container');
+                     const previewImage = container.querySelector('img');
+                     previewImage.src = url;
+                     previewImage.style.display = 'block';
+                     addCropperFileInput.croppedFile = croppedFile;
+                     addCropperFileInput = null;
+                 } else if (updateCropperFileInput) {
+                     const container = updateCropperFileInput.parentElement.querySelector('.image-container');
+                     const previewImage = container.querySelector('img');
+                     previewImage.src = url;
+                     updateCropperFileInput.croppedFile = croppedFile;
+                     updateCropperFileInput = null;
+                 }
+             }, "image/jpeg");
 
-function triggerFileInput(adId) {
-    document.getElementById(`file-${adId}`).click();
-}
+             const modal = bootstrap.Modal.getInstance(document.getElementById("cropperModal"));
+             modal.hide();
+         }
+     }
 
-function addAd() {
-    const newAd = new FormData();
-    newAd.append("adName", document.getElementById("newAdName").value);
-    newAd.append("adInfo", document.getElementById("newAdInfo").value);
+     function triggerFileInput(adId) {
+         document.getElementById(`file-${adId}`).click();
+     }
 
-    // 確保圖片文件存在，否則傳遞一個空的 Blob
-    if (currentFileInput && currentFileInput.croppedFile) {
-        newAd.append("adImage", currentFileInput.croppedFile);
-    } else {
-        // 如果沒有裁切過的文件，傳遞原始文件或處理為空
-        const originalFile = currentFileInput && currentFileInput.files[0];
-        if (originalFile) {
-            newAd.append("adImage", originalFile);
-        } else {
-            newAd.append("adImage", new Blob());
-        }
-    }
+     function triggerAddFileInput() {
+         document.getElementById("newAdImage").click();
+     }
 
-    fetch("/adInfo/add", {
-        method: "POST",
-        body: newAd
-    })
-        .then(response => response.text())
-        .then(message => {
-            alert(message);
-            loadAdInfo();
-        })
-        .catch(error => console.error("Error:", error));
-}
+     function addAd() {
+         const adName = document.getElementById("newAdName").value.trim();
+         const adInfo = document.getElementById("newAdInfo").value.trim();
 
-function updateAd(adId, button) {
-    const row = button.closest("tr");
-    const adName = row.querySelector(".ad-name").value.trim();
-    const adInfo = row.querySelector(".ad-info").value.trim();
-    const adImageInput = row.querySelector(".ad-image");
+         if (adName === "" || adInfo === "") {
+             alert("請填寫廣告名稱和廣告敘述。");
+             return;
+         }
 
-    const updatedAd = new FormData();
-    updatedAd.append("adId", adId);
-    updatedAd.append("adName", adName);
-    updatedAd.append("adInfo", adInfo);
+         const newAd = new FormData();
+         newAd.append("adName", adName);
+         newAd.append("adInfo", adInfo);
 
-    // 確保圖片文件存在，否則不更新圖片或傳遞空的 Blob
-    if (adImageInput && adImageInput.croppedFile) {
-        updatedAd.append("adImage", adImageInput.croppedFile);
-    } else {
-        // 如果沒有裁切過的文件，傳遞原始文件或不更新圖片
-        const originalFile = adImageInput && adImageInput.files[0];
-        if (originalFile) {
-            updatedAd.append("adImage", originalFile);
-        } else {
-            // 如果不希望更新圖片，可以選擇不傳遞 adImage 字段
-            // updatedAd.append("adImage", new Blob()); // 或傳遞空的 Blob
-        }
-    }
+         const newAdImageInput = document.getElementById("newAdImage");
+         const newAdPreview = document.getElementById("newAdPreview");
 
-    fetch("/adInfo/update", {
-        method: "POST",
-        body: updatedAd
-    })
-        .then(response => response.text())
-        .then(message => {
-            alert(message);
-            loadAdInfo();
-        })
-        .catch(error => console.error("Error:", error));
-}
+         if (newAdImageInput && newAdImageInput.croppedFile) {
+             newAd.append("adImage", newAdImageInput.croppedFile);
+         } else if (newAdImageInput && newAdImageInput.files[0]) {
+             newAd.append("adImage", newAdImageInput.files[0]);
+         } else {
+             newAd.append("adImage", new Blob());
+         }
 
+         fetch("/adInfo/add", {
+             method: "POST",
+             body: newAd
+         })
+             .then(response => response.text())
+             .then(message => {
+                 alert(message);
+                 loadAdInfo();
+                 // 清空新增廣告的欄位
+                 document.getElementById("newAdName").value = "";
+                 document.getElementById("newAdInfo").value = "";
+                 document.getElementById("newAdImage").value = "";
+                 newAdPreview.src = "#";
+                 newAdPreview.style.display = 'none';
+                 if (cropper) {
+                     cropper.destroy();
+                     cropper = null;
+                 }
+             })
+             .catch(error => console.error("錯誤:", error));
+     }
+
+     function updateAd(adId, button) {
+         const row = button.closest("tr");
+         const adName = row.querySelector(".ad-name").value.trim();
+         const adInfo = row.querySelector(".ad-info").value.trim();
+         const adImageInput = row.querySelector(".ad-image");
+
+         if (adName === "" || adInfo === "") {
+             alert("請填寫廣告名稱和廣告敘述。");
+             return;
+         }
+
+         const updatedAd = new FormData();
+         updatedAd.append("adId", adId);
+         updatedAd.append("adName", adName);
+         updatedAd.append("adInfo", adInfo);
+
+         if (adImageInput && adImageInput.croppedFile) {
+             updatedAd.append("adImage", adImageInput.croppedFile);
+         } else if (adImageInput && adImageInput.files[0]) {
+             updatedAd.append("adImage", adImageInput.files[0]);
+         } 
+         // 如果不想更新圖片，可以選擇不傳遞 "adImage" 欄位
+
+         fetch("/adInfo/update", {
+             method: "POST",
+             body: updatedAd
+         })
+             .then(response => response.text())
+             .then(message => {
+                 alert(message);
+                 loadAdInfo();
+             })
+             .catch(error => console.error("錯誤:", error));
+     }
   </script>
 </body>
 </html>
