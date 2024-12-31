@@ -161,6 +161,12 @@
       <button class="w-100 btn btn-lg btn-warning" type="submit">登入</button>
       </div>
       
+       <br>
+      
+      <div>
+      <button class="w-100 btn btn-lg btn-warning" type="button" id="forgotPassword">忘記密碼</button>
+      </div>
+      
       <br>
       <div>
       <!-- Google-like pure color button -->
@@ -370,6 +376,12 @@
       document.getElementById('googleLoginBtn').addEventListener('click', function () {
         window.location.href = '/oauth2/authorization/google';
       });
+      
+      //用button建立忘記密碼按鈕，用JS導向。
+      document.getElementById('forgotPassword').addEventListener('click', function () {
+        window.location.href = '/password/forgot';
+      });
+      
 	});
 </script>
 </body>

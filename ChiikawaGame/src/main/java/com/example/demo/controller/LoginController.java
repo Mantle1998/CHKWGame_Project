@@ -31,7 +31,7 @@ public class LoginController {
     	// 檢查 session 中是否有 user 資料，表示用戶已經登入
     	if(session.getAttribute("user") != null) {
     		// 如果已經登入，重定向到首頁（或其他頁面）
-    		return "/memberCenter/memberCenter";// 可以根據需求修改重定向的頁面
+    		return "/memberCenter/memberProfile";// 可以根據需求修改重定向的頁面
     	}
     	
     	// 如果沒有登入，顯示登入頁面
@@ -135,7 +135,7 @@ public class LoginController {
             return "redirect:/login"; // 可以根據需求修改重定向的頁面
         }
         // 如果 session 中有 user，則顯示會員中心頁面
-        return "/memberCenter/memberCenter"; // 返回對應的 Thymeleaf 模板名稱
+        return "/memberCenter/memberProfile"; // 返回對應的 Thymeleaf 模板名稱
     }
 
     
