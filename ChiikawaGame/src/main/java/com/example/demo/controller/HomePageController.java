@@ -263,7 +263,7 @@ public class HomePageController {
             .orElse(BigDecimal.ZERO);
 
         // 商品平均評價
-        Double averageRating = reviewRepository.findAverageRatingByReviewItemId(itemId.longValue());
+        Double averageRating = reviewRepository.findAverageRatingByReviewItemId((int) itemId.longValue());
         if (averageRating == null) {
             averageRating = 0.0;
         }
@@ -276,10 +276,10 @@ public class HomePageController {
         int sellerItemCount = itemRepository.countByUserInfo(seller);
 
         // 該「商品」的評論總數
-        long totalReviews = reviewRepository.countByReviewItemId(itemId.longValue());
+        long totalReviews = reviewRepository.countByReviewItemId((int) itemId.longValue());
 
         // 該「商品」的評論列表
-        List<Reviews> reviews = reviewRepository.findByReviewItemId(itemId.longValue());
+        List<Reviews> reviews = reviewRepository.findByReviewItemId((int) itemId.longValue());
 
         // === 新增部分：計算「賣家」的評論總數 ===
         long sellerTotalReviews = 0;
@@ -470,7 +470,7 @@ public class HomePageController {
     @GetMapping("/itemDisplay/{id}/reviews")
     @ResponseBody
     public Page<Map<String, Object>> getItemReviews(
-            @PathVariable("id") Long itemId,
+            @PathVariable("id") Integer itemId,
             @RequestParam(defaultValue = "0") int page,    // 第幾頁(後端從0開始)
             @RequestParam(defaultValue = "5") int size     // 每頁幾筆
     ) {

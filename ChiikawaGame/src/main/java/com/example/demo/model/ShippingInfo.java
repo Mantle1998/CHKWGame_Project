@@ -1,6 +1,7 @@
 package com.example.demo.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import jakarta.persistence.*;
@@ -32,10 +33,13 @@ public class ShippingInfo {
     private String shippingInfoStatus;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "order_id", nullable = false)
-    @JsonBackReference
-    @NotNull(message = "訂單關聯不能為空")
+    @JoinColumn(name = "shipping_method_id", nullable = false)
+    private ShippingMethod shippingMethod;
+
+    @OneToOne
+    @JoinColumn(name = "order_id", nullable = false) // 跟 DB對應
     private Order order;
+
 
     @Column(name = "shipping_info_tracking_number")
     @Size(max = 100, message = "物流追蹤號不能超過 100 個字元")
@@ -44,6 +48,14 @@ public class ShippingInfo {
     @Lob
     @Column(name = "shipping_info_image")
     private byte[] shippingInfoImage;
+
+    public void setOrder(Order order) {
+        this.order = order;
+        if (order != null && order.getShippingInfo() != this) {
+            order.setShippingInfo(this);
+        }
+    }
+
 
 	public Long getShippingInfoId() {
 		return shippingInfoId;
@@ -77,12 +89,12 @@ public class ShippingInfo {
 		this.shippingInfoStatus = shippingInfoStatus;
 	}
 
-	public Order getOrder() {
-		return order;
+	public ShippingMethod getShippingMethod() {
+		return shippingMethod;
 	}
 
-	public void setOrder(Order order) {
-		this.order = order;
+	public void setShippingMethod(ShippingMethod shippingMethod) {
+		this.shippingMethod = shippingMethod;
 	}
 
 	public String getShippingInfoTrackingNumber() {
@@ -99,6 +111,10 @@ public class ShippingInfo {
 
 	public void setShippingInfoImage(byte[] shippingInfoImage) {
 		this.shippingInfoImage = shippingInfoImage;
+	}
+
+	public Order getOrder() {
+		return order;
 	}
 
 }

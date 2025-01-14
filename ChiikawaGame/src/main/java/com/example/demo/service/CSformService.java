@@ -1,15 +1,12 @@
 package com.example.demo.service;
 
 import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import com.example.demo.model.CSformRepository;
-import com.example.demo.model.LoginRepository;
 import com.example.demo.model.CSform;
+import com.example.demo.model.CSformRepository;
+
+import jakarta.transaction.Transactional;
 
 @Service
 public class CSformService {
@@ -17,20 +14,23 @@ public class CSformService {
 	@Autowired
 	private CSformRepository csfr;
 
-	// 修改 addform 方法，將 userId 作為參數
+	@Transactional
     public CSform addform(String CSFormSort, String CSFormTitle, String CSFormContent, Date CSFormDate, Integer userId) {
-        CSform csf = new CSform();
-        csf.setCSFormSort(CSFormSort);
-        csf.setCSFormTitle(CSFormTitle);
-        csf.setCSFormContent(CSFormContent);
-        csf.setCSFormDate(CSFormDate);  // 使用傳入的日期
-        csf.setUserId(userId);  // 設定 userId
-        
-        // 儲存並返回結果
-        return csfr.save(csf);
+        try {
+            CSform csf = new CSform();
+            csf.setCSFormSort(CSFormSort);
+            csf.setCSFormTitle(CSFormTitle);
+            csf.setCSFormContent(CSFormContent);
+            csf.setCSFormDate(CSFormDate);
+            csf.setUserId(userId);
+            csf.setCSFormChack(0); // 設定初始狀態
+            
+            return csfr.save(csf);
+        } catch (Exception e) {
+            throw new RuntimeException("保存表單失敗: " + e.getMessage());
+        }
     }
 
-	
 	 // 提交回覆並更新狀態
     public boolean submitReply(int CSFormId, String CSFormReply, int CSFormChack) {
         // 查詢指定的表單

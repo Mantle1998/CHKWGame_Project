@@ -7,7 +7,6 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -128,7 +127,7 @@ public class Reviews {
 		this.orderItem = orderItem;
 	}
 
-	public long getReviewItemId() {
+	public int getReviewItemId() {
 		return reviewItemId;
 	}
 
@@ -136,7 +135,7 @@ public class Reviews {
 		this.reviewItemId = reviewItemId;
 	}
 
-	public long getReviewSellerId() {
+	public int getReviewSellerId() {
 		return reviewSellerId;
 	}
 
@@ -144,7 +143,7 @@ public class Reviews {
 		this.reviewSellerId = reviewSellerId;
 	}
 
-	public long getReviewBuyerId() {
+	public int getReviewBuyerId() {
 		return reviewBuyerId;
 	}
 

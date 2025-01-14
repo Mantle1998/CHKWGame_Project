@@ -24,8 +24,8 @@ public class CSQAData {
     private Integer CSQADataId;
     // 用於儲存表格中的 ID 欄位
 
-    // 指定 "CSQADataSort" 欄位，必須是唯一且不可為空值
-    @Column(name = "CSQADataSort", nullable = false)
+    // 指定 "CSQADataSort" 欄位，不可為空值
+    @Column(name = "CSQADataSort",nullable = false)
     private String CSQADataSort;
     // 用於儲存分類資訊
 

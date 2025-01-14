@@ -2,6 +2,7 @@ package com.example.demo.service;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +36,7 @@ public class ReviewService {
     private ImageStorageService imageStorageService;
 
     //新增商品評論
-    public Reviews addReviewWithImage(Long orderId, Long orderItemId, Long reviewItemId, MultipartFile[] files, int reviewEvaluation, String reviewComment) {
+    public Reviews addReviewWithImage(Long orderId, Long orderItemId, Integer reviewItemId, MultipartFile[] files, Integer reviewEvaluation, String reviewComment) {
         // 確認該商品屬於指定訂單
         OrderItem orderItem = orderItemRepository.findById(orderItemId)
                 .orElseThrow(() -> new RuntimeException("OrderItem not found"));
@@ -47,8 +48,8 @@ public class ReviewService {
         // 建立評論
         Reviews review = new Reviews();
         review.setReviewOrderId(orderItem.getOrder().getOrderId());// 設定訂單 ID
-        review.setReviewSellerId(orderItem.getSellerId());         // 設定賣家 ID
-        review.setReviewBuyerId(orderItem.getOrder().getBuyerId());// 設定買家 ID
+        review.setReviewSellerId(orderItem.getSeller().getUserId());         // 設定賣家 ID
+        review.setReviewBuyerId(orderItem.getOrder().getBuyer().getUserId());// 設定買家 ID
         review.setReviewEvaluation(reviewEvaluation);              // 設定評分
         review.setReviewComment(reviewComment);    				   // 設定評論
         review.setReviewItemId(reviewItemId);					   // 設定商品ID
@@ -76,9 +77,28 @@ public class ReviewService {
     }
     
     // 查詢是否已存在該買家對該訂單的評論
-    public boolean hasReviewedOrder(long reviewBuyerId, long reviewOrderId) {
+    public boolean hasReviewedOrder(int reviewBuyerId, long reviewOrderId) {
         return reviewRepository.existsByReviewBuyerIdAndReviewOrderId(reviewBuyerId, reviewOrderId);
     }
+    
+    // 評論: 根據訂單編號獲取商品資訊(OrderController)
+    public List<OrderItem> getOrderItemsByOrderId(Long orderId) {
+        return orderItemRepository.findByOrderOrderId(orderId);
+    }
+    
+    // 評論: 根據訂單商品編號獲取商品資訊(ReviewController)
+    public Integer getItemIdByOrderItemId(Long orderItemId) throws Exception {
+        // 使用 Repository 查詢對應的 OrderItem
+        Optional<OrderItem> orderItemOptional = orderItemRepository.findById(orderItemId);
+        
+        if (orderItemOptional.isPresent()) {
+            // 返回對應的 itemId
+            return orderItemOptional.get().getItem().getItemId();
+        } else {
+            // 若找不到，拋出異常或處理錯誤
+            throw new Exception("OrderItem not found for ID: " + orderItemId);
+        }
+    } 
     
     // 查詢所有評論資料並分頁
     public Page<Reviews> findReviewsByPage(int pageNumber) {
@@ -137,7 +157,7 @@ public class ReviewService {
 	}
 	
 	//利用賣家來找尋評論
-	public Page<Reviews> findReviewByBeReviewedAndEvaluation(Long reviewSellerId, Integer reviewEvaluation, Integer pageNumber) {
+	public Page<Reviews> findReviewByBeReviewedAndEvaluation(Integer reviewSellerId, Integer reviewEvaluation, Integer pageNumber) {
 	    PageRequest pgr = PageRequest.of(pageNumber - 1, 5, Sort.Direction.DESC, "reviewDate");
 	    return reviewRepository.findByBeReviewedAndReviewEvaluation(reviewSellerId, reviewEvaluation, pgr);
 	}
@@ -154,13 +174,13 @@ public class ReviewService {
     }
     
     //利用reviewItemId(商品ID)來找尋評論
-    public Page<Reviews> findByReviewItemIdAndReviewEvaluation(Long reviewItemId, Integer reviewEvaluation, Integer pageNumber) {
+    public Page<Reviews> findByReviewItemIdAndReviewEvaluation(Integer reviewItemId, Integer reviewEvaluation, Integer pageNumber) {
     	PageRequest pgr = PageRequest.of(pageNumber - 1, 5, Sort.Direction.DESC, "reviewDate");
     	return reviewRepository.findByReviewItemIdAndReviewEvaluation(reviewItemId, reviewEvaluation, pgr);
     }
     
 	//計算某reviewItemId的平均評分
-    public double getItemsAverageRating(Long reviewItemId) {
+    public double getItemsAverageRating(Integer reviewItemId) {
         Double averageRating = reviewRepository.findAverageRatingByReviewItemId(reviewItemId);
         return averageRating != null ? averageRating : 0.0; // 防止空值返回
     }

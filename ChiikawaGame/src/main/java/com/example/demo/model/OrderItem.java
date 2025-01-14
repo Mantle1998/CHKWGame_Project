@@ -1,146 +1,122 @@
 package com.example.demo.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
-import jakarta.validation.constraints.Size;
+
+import lombok.NoArgsConstructor;
+
+
 import java.math.BigDecimal;
-import java.util.Objects;
 
 @Entity
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Table(name = "order_items")
+@NoArgsConstructor
 public class OrderItem {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "order_item_id")
-    private Long orderItemId; // 訂單項目 ID
+    private Long orderItemId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id", nullable = false)
-    @JsonBackReference
-    @NotNull
-    private Order order; // 關聯的訂單
+    @JsonBackReference // 防止循環
+    private Order order;
 
-    @Column(name = "seller_id", nullable = false)
-    @NotNull
-    private Long sellerId; // 賣家 ID
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "item_id", nullable = false)
+    private Item item;
 
-    @Column(name = "item_id", nullable = false)
-    @NotNull
-    private Long itemId; // 商品 ID
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "seller_id", nullable = false)
+    private UserInfo seller;
 
-    @Column(name = "item_name", nullable = false)
-    @NotNull
-    @Size(max = 255)
-    private String itemName; // 商品名稱
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "item_size", nullable = false)
+    @JsonIgnore // 防止序列化遞歸
+    private ItemOption itemSize;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "item_photo_id", nullable = true)
+    @JsonIgnore // 防止序列化遞歸
+    private ItemPhoto itemPhoto;
+
+    @NotNull
+    @Positive
     @Column(name = "item_quantity", nullable = false)
-    @NotNull
-    @Positive
-    private Integer itemQuantity; // 商品數量
+    private Integer itemQuantity;
 
+    @NotNull
     @Column(name = "item_price", nullable = false)
-    @NotNull
-    @Positive
-    private BigDecimal itemPrice; // 商品單價
+    private BigDecimal itemPrice;
 
-    @Column(name = "item_size", nullable = false)
-    @NotNull
-    @Size(max = 50)
-    private String itemSize; // 商品尺寸
+	public Long getOrderItemId() {
+		return orderItemId;
+	}
 
-    // Constructors
-    public OrderItem() {
-    }
+	public void setOrderItemId(Long orderItemId) {
+		this.orderItemId = orderItemId;
+	}
 
-    // Getters and Setters
+	public Order getOrder() {
+		return order;
+	}
 
-    public Long getOrderItemId() {
-        return orderItemId;
-    }
+	public void setOrder(Order order) {
+		this.order = order;
+	}
 
-    public void setOrderItemId(Long orderItemId) {
-        this.orderItemId = orderItemId;
-    }
+	public Item getItem() {
+		return item;
+	}
 
-    public Order getOrder() {
-        return order;
-    }
+	public void setItem(Item item) {
+		this.item = item;
+	}
 
-    public void setOrder(Order order) {
-        this.order = order;
-        if (order != null && !order.getOrderItems().contains(this)) {
-            order.getOrderItems().add(this);
-        }
-    }
+	public UserInfo getSeller() {
+		return seller;
+	}
 
-    public Long getSellerId() {
-        return sellerId;
-    }
+	public void setSeller(UserInfo seller) {
+		this.seller = seller;
+	}
 
-    public void setSellerId(Long sellerId) {
-        this.sellerId = sellerId;
-    }
+	public ItemOption getItemSize() {
+		return itemSize;
+	}
 
-    public Long getItemId() {
-        return itemId;
-    }
+	public void setItemSize(ItemOption itemSize) {
+		this.itemSize = itemSize;
+	}
 
-    public void setItemId(Long itemId) {
-        this.itemId = itemId;
-    }
+	public ItemPhoto getItemPhoto() {
+		return itemPhoto;
+	}
 
-    public String getItemName() {
-        return itemName;
-    }
+	public void setItemPhoto(ItemPhoto itemPhoto) {
+		this.itemPhoto = itemPhoto;
+	}
 
-    public void setItemName(String itemName) {
-        this.itemName = itemName;
-    }
+	public Integer getItemQuantity() {
+		return itemQuantity;
+	}
 
-    public Integer getItemQuantity() {
-        return itemQuantity;
-    }
+	public void setItemQuantity(Integer itemQuantity) {
+		this.itemQuantity = itemQuantity;
+	}
 
-    public void setItemQuantity(Integer itemQuantity) {
-        this.itemQuantity = itemQuantity;
-    }
+	public BigDecimal getItemPrice() {
+		return itemPrice;
+	}
 
-    public BigDecimal getItemPrice() {
-        return itemPrice;
-    }
+	public void setItemPrice(BigDecimal itemPrice) {
+		this.itemPrice = itemPrice;
+	}
 
-    public void setItemPrice(BigDecimal itemPrice) {
-        this.itemPrice = itemPrice;
-    }
 
-    public String getItemSize() {
-        return itemSize;
-    }
-
-    public void setItemSize(String itemSize) {
-        this.itemSize = itemSize;
-    }
-
-    // equals and hashCode
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        OrderItem orderItem = (OrderItem) o;
-
-        return Objects.equals(orderItemId, orderItem.orderItemId);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(orderItemId);
-    }
 }

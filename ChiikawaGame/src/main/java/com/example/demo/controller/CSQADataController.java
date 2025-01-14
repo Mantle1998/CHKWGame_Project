@@ -1,27 +1,22 @@
 package com.example.demo.controller;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.example.demo.model.CSQADataRepository;
-import com.example.demo.service.QADataService;
 import com.example.demo.model.CSQAData;
+import com.example.demo.service.QADataService;
+import com.example.demo.model.CSQADataRepository;
 
 @Controller  // 使用 @Controller 來渲染視圖
 @CrossOrigin(origins = "*")  // 允許所有來源的跨域請求
@@ -33,12 +28,6 @@ public class CSQADataController {
     @Autowired
     private QADataService qads;
     
-    // 顯示常見問題總覽頁面 (http://localhost:8080/QA_manage)
-    @GetMapping("/QA_manage")
-    public String showQA_manage() {
-        return "Customer_Service/QA_manage";
-    }
-
     // 取得所有常見問題內容，回傳 JSON 格式 (http://localhost:8080/QA_manage/json)
     @GetMapping("/QA_manage/json")
     @ResponseBody

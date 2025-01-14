@@ -331,10 +331,10 @@
 							</div>
 						</div>
 						<div
-							class="action-buttons d-flex justify-content-end align-items-center mt-4">
-							<button class="btn btn-add-cart btn-custom me-3">加入購物車</button>
-							<button class="btn btn-buy-now btn-custom">直接購買</button>
-						</div>
+						class="action-buttons d-flex justify-content-end align-items-center mt-4">
+						<button class="btn btn-add-cart btn-custom me-3" id="addToCartBtn">加入購物車</button>
+						<button class="btn btn-buy-now btn-custom">直接購買</button>
+					</div>
 					</div>
 				</div>
 			</section>
@@ -433,6 +433,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const increaseBtn = document.getElementById('increaseQty');
     const sizeSelect = document.getElementById('sizeSelect');
     const priceDisplay = document.getElementById("priceDisplay");
+    const addToCartBtn = document.getElementById('addToCartBtn');
 
     let maxStock = 1;
 
@@ -466,6 +467,44 @@ document.addEventListener("DOMContentLoaded", () => {
     };
     updatePrice();
     sizeSelect.addEventListener("change", updatePrice);
+    
+ // 加入購物車按鈕邏輯
+    addToCartBtn.addEventListener('click', () => {
+        const quantity = parseInt(quantityInput.value);
+
+        if (quantity <= 0) {
+            alert('請選擇有效數量');
+            return;
+        }
+
+        // 根據實際需要獲取 optionId
+        const optionId = sizeSelect.value; 
+        
+        fetch('/api/cart/items', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                optionId: optionId,
+                itemQuantity: quantity
+            })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('加入購物車失敗！');
+            }
+            return response.json();
+        })
+        .then(data => {
+            alert('商品成功加入購物車！');
+            console.log('購物車更新後數據：', data);
+        })
+        .catch(error => {
+            alert(error.message);
+            console.error('加入購物車時發生錯誤：', error);
+        });
+    });
 
 
     // -----------------------------

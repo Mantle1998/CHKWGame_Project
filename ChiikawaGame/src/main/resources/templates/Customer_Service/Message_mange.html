@@ -1,196 +1,272 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet">
-    <title>客服表單管理</title>
-</head>
-<body>
-    <div th:replace="~{Customer_Service/html/saHeader}"></div>
-    
-    <h1 class="text-center">
-	    	<span class="btn header-btn" style="font-size: 25px;">客服表單管理</span>
-	</h1>
-    
-    <div class="container mt-4">
-        <h2>查詢列表</h2>
-        <div class="mb-4" style="display: flex; gap: 10px; align-items: center;">
-            <label for="searchInput" style="flex-shrink: 0;">搜尋表單:</label>
-            <input type="text" id="searchInput" class="form-control" style="flex-grow: 1;" placeholder="可輸入表單ID、問題分類、問題標題、問題內容來查詢">
-            <button class="btn btn-primary" onclick="searchReview()" style="flex-shrink: 0;flex-grow: 1;">搜尋</button>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet" />
+    <title>訊息中心管理</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+      }
+      .content-wrapper {
+        width: 90%;
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0 15px;
+      }
+    </style>
+  </head>
+  <body>
+    <div th:replace="~{layout/saHeader}"></div>
+
+    <div class="content-wrapper">
+      <h1 class="text-center">
+        <span class="btn header-btn" style="font-size: 25px">訊息中心管理</span>
+      </h1>
+      <!-- 分類篩選 -->
+      <div class="mt-4">
+        <div class="mb-4" style="display: flex; gap: 10px; align-items: center">
+          <label for="categoryFilter" style="flex-shrink: 0">訊息分類:</label>
+          <select id="categoryFilter" class="form-control" style="width: 200px">
+            <option value="all">全部分類</option>
+            <option value="客服通知">客服通知</option>
+            <option value="徵物通知">徵物通知</option>
+            <option value="官方通知">官方通知</option>
+            <option value="系統通知">系統通知</option>
+            <option value="其他通知">其他通知</option>
+          </select>
+          <button
+            type="button"
+            class="btn btn-primary"
+            id="new"
+            data-bs-toggle="modal"
+            data-bs-target="#addModal"
+            style="margin-left: auto"
+          >
+            新增項目
+          </button>
         </div>
 
         <div class="mb-4">
-            <h2>表單列表</h2>
+          <div class="table-responsive">
             <table id="faTable" class="table table-striped">
-                <thead>
-                    <tr>
-                        <th style="width:10%">表單ID</th>
-                        <th style="width:10%">問題分類</th>
-                        <th style="width:10%">問題標題</th>
-                        <th style="width:20%">問題內容</th>
-                        <th style="width:15%">提交時間</th>
-                        <th style="width:10%">目前狀態</th>
-                        <th style="width:15%">回覆</th>
-                    </tr>
-                </thead>
-                <tbody id="listform">
-                    <!-- 資料將通過 JavaScript 動態插入 -->
-                </tbody>
+              <thead>
+                <tr>
+                  <th style="width: 8%">訊息ID</th>
+                  <th style="width: 8%">收件人ID</th>
+                  <th style="width: 8%">寄件者ID</th>
+                  <th style="width: 10%">訊息分類</th>
+                  <th style="width: 15%">訊息標題</th>
+                  <th style="width: 25%">訊息內容</th>
+                  <th style="width: 15%">發送時間</th>
+                </tr>
+              </thead>
+              <tbody id="listform">
+                <!-- 資料將通過 JavaScript 動態插入 -->
+              </tbody>
             </table>
+          </div>
         </div>
-    </div>
-    
-    <!-- 修改視窗 -->
-    <div class="modal fade" id="replyModal" tabindex="-1" aria-labelledby="replyModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="replyModalLabel">回覆表單</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="replyForm">
-                        <input type="hidden" id="CSFormId"> <!-- 對應表單 ID -->
-                        <div class="mb-3">
-                            <label for="CSFormReply" class="form-label">回覆內容</label>
-                            <textarea class="form-control" id="CSFormReply" rows="3"></textarea> <!-- 回覆內容 -->
-                        </div>
-                        <div class="mb-3">
-                            <label for="CSFormChack" class="form-label">目前狀態</label>
-                            <select class="form-control" id="CSFormChack">
-                                <option value="1">已完成</option>
-                                <option value="0">待處理</option>
-                            </select> <!-- 狀態選擇 -->
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
-                    <button type="button" class="btn btn-primary" onclick="submitReply()">送出</button>
-                </div>
-            </div>
-        </div>
+      </div>
     </div>
 
-    <div th:replace="~{Customer_Service/html/footer}"></div>
+    <!-- 新增訊息 Modal -->
+    <div class="modal fade" id="addModal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">新增訊息</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <form id="messageForm">
+              <div class="mb-3">
+                <label for="messageuserId" class="form-label"
+                  >接收使用者ID</label
+                >
+                <input
+                  type="number"
+                  class="form-control"
+                  id="messageuserId"
+                  required
+                />
+              </div>
+              <div class="mb-3">
+                <label for="messageSort" class="form-label">訊息分類</label>
+                <select class="form-control" id="messageSort" required>
+                  <option value="客服通知">客服通知</option>
+                  <option value="徵物通知">徵物通知</option>
+                  <option value="官方通知">官方通知</option>
+                  <option value="系統通知">系統通知</option>
+                  <option value="其他通知">其他通知</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="messageTitle" class="form-label">訊息標題</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="messageTitle"
+                  required
+                />
+              </div>
+              <div class="mb-3">
+                <label for="messageContent" class="form-label">訊息內容</label>
+                <textarea
+                  class="form-control"
+                  id="messageContent"
+                  rows="3"
+                  required
+                ></textarea>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              取消
+            </button>
+            <button type="button" class="btn btn-primary" id="saveMessage">
+              儲存
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <script src="/js/bootstrap.bundle.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
-    <script>
-    		// 定義 API 路徑
-			const apiUrl = "http://localhost:8080/form_manage/json";
-        	$(document).ready(function () {
-        	
-            // 從後端獲取 JSON 資料
-            $.ajax({
-                url: apiUrl, // API 的 URL
-                method: "GET",
-                success: function (data) {
-                    let tableBody = $("#listform");
-                    tableBody.empty(); // 清空表格內容
+    <script
+      src="https://code.jquery.com/jquery-3.7.1.js"
+      integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4="
+      crossorigin="anonymous"
+    ></script>
 
-                    data.forEach(form => {
-                        const status = form.csformChack === 1 ? "已完成" : "待處理";
-                        const row = `
-                            <tr>
-                                <td>${form.csformId}</td>
-                                <td>${form.csformSort}</td>
-                                <td>${form.csformTitle}</td>
-                                <td>${form.csformContent}</td>
-                                <td>${form.csformDate}</td>
-                                <td>${status}</td>
-                                <td>
-                                    <button class="btn btn-success btn-sm" onclick="openReplyModal(${form.csformId}, ${form.csformChack})">回覆</button>
-                                </td>
-                            </tr>
-                        `;
-                        tableBody.append(row);
-                    });
-                },
-                error: function (error) {
-                    console.error("無法取得資料", error);
+    <script>
+      $(document).ready(function () {
+        // 載入訊息
+        function loadMessages() {
+          const category = $("#categoryFilter").val();
+          $.ajax({
+            url: "/messages",
+            method: "GET",
+            data: { category: category },
+            success: function (messages) {
+              displayMessages(messages);
+            },
+            error: function (xhr, status, error) {
+              console.error("Error loading messages:", error);
+              alert("載入訊息時發生錯誤");
+            },
+          });
+        }
+
+        // 顯示訊息
+        function displayMessages(messages) {
+          const tbody = $("#listform");
+          tbody.empty();
+          const selectedCategory = $("#categoryFilter").val();
+
+          messages.forEach(function (message) {
+            console.log("處理訊息：", message);
+            if (
+              selectedCategory === "all" ||
+              message.messageSort === selectedCategory
+            ) {
+              const row = $("<tr>").append(
+                $("<td>").text(message.messageId),
+                $("<td>").text(message.messageuserId),
+                $("<td>").text(message.messagesenderId),
+                $("<td>").text(message.messageSort),
+                $("<td>").text(message.messageTitle),
+                $("<td>").text(message.messageContent),
+                $("<td>").text(
+                  new Date(message.messageDate).toLocaleDateString("zh-TW")
+                )
+              );
+              tbody.append(row);
+            }
+          });
+        }
+
+        // 儲存訊息
+        $("#saveMessage").click(function () {
+          const messageData = {
+            messageuserId: parseInt($("#messageuserId").val()),
+            messageSort: $("#messageSort").val(),
+            messageTitle: $("#messageTitle").val(),
+            messageContent: $("#messageContent").val(),
+          };
+
+          $.ajax({
+            url: "/messages",
+            method: "POST",
+            contentType: "application/json",
+            data: JSON.stringify(messageData),
+            success: function (response) {
+              // 重置表單
+              $("#messageForm")[0].reset();
+
+              // 關閉 Modal
+              const modalElement = document.getElementById("addModal");
+              const modalInstance = bootstrap.Modal.getInstance(modalElement);
+              modalInstance.hide();
+
+              // 清除 modal 相關效果
+              setTimeout(function () {
+                document.body.classList.remove("modal-open");
+                document.body.style.overflow = "";
+                document.body.style.paddingRight = "";
+
+                // 移除背景遮罩
+                const backdrops =
+                  document.getElementsByClassName("modal-backdrop");
+                while (backdrops.length > 0) {
+                  backdrops[0].parentNode.removeChild(backdrops[0]);
                 }
-            });
+
+                // 重新載入訊息列表
+                loadMessages();
+              }, 100);
+            },
+            error: function (xhr, status, error) {
+              console.error("新增訊息失敗：", error);
+              console.error("錯誤詳情：", xhr.responseText);
+              alert("新增訊息失敗：" + error);
+            },
+          });
         });
 
-        // 開啟回覆視窗並填充資料
-        function openReplyModal(csformId, csformChack) {
-            // 填充模態視窗中的表單資料
-            $("#CSFormId").val(csformId);
-            $("#CSFormChack").val(csformChack);
+        // Modal 隱藏事件監聽
+        $("#addModal").on("hidden.bs.modal", function () {
+          // 確保 modal 完全關閉後清理
+          document.body.classList.remove("modal-open");
+          document.body.style.overflow = "";
+          document.body.style.paddingRight = "";
 
-            // 清空回覆內容
-            $("#CSFormReply").val("");
+          // 移除背景遮罩
+          const backdrops = document.getElementsByClassName("modal-backdrop");
+          while (backdrops.length > 0) {
+            backdrops[0].parentNode.removeChild(backdrops[0]);
+          }
+        });
 
-            // 顯示模態視窗
-            $("#replyModal").modal("show");
-        }
+        // 分類篩選變更事件
+        $("#categoryFilter").change(function () {
+          loadMessages();
+        });
 
-        // 提交回覆資料
-        function submitReply() {
-            const CSFormId = $("#CSFormId").val();
-            const CSFormReply = $("#CSFormReply").val();
-            const CSFormChack = $("#CSFormChack").val();
-
-            if (!CSFormReply.trim()) {
-                alert("回覆內容不可為空！");
-                return;
-            }
-
-		$.ajax({
-		    url: "http://localhost:8080/submitReply",
-		    method: "POST",
-		    data: {
-		        CSFormId: CSFormId,
-		        CSFormReply: CSFormReply,
-		        CSFormChack: CSFormChack
-		    },
-		    success: function(response) {
-		        console.log("回覆成功:", response);
-		        $("#replyModal").modal("hide");
-		        location.reload(); // 刷新頁面以反映更新
-		    },
-		    error: function(error) {
-		        console.error("回覆失敗", error);
-		        alert("回覆失敗，請稍後再試！");
-		    }
-		});
-		
-		
-		// 提交新增表單資料
-function submitNewForm() {
-    const newFormSort = $("#newFormSort").val().trim();
-    const newFormTitle = $("#newFormTitle").val().trim();
-    const newFormContent = $("#newFormContent").val().trim();
-
-    if (!newFormSort || !newFormTitle || !newFormContent) {
-        alert("所有欄位均為必填！");
-        return;
-    }
-
-    $.ajax({
-        url: "http://localhost:8080/addForm", // 替換為您的後端 API
-        method: "POST",
-        data: {
-            csformSort: newFormSort,
-            csformTitle: newFormTitle,
-            csformContent: newFormContent,
-        },
-        success: function (response) {
-            console.log("新增成功:", response);
-            $("#addFormModal").modal("hide");
-            location.reload(); // 刷新頁面以更新資料
-        },
-        error: function (error) {
-            console.error("新增失敗", error);
-            alert("新增失敗，請稍後再試！");
-        }
-    });
-}
-		
-        }
+        // 初始載入
+        loadMessages();
+      });
     </script>
-</body>
+  </body>
 </html>

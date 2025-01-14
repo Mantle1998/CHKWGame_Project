@@ -1,17 +1,21 @@
 package com.example.demo.model;
 
-import com.example.demo.model.ShippingInfo;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
-public interface ShippingInfoRepository extends JpaRepository<ShippingInfo, Long> {
+public interface ShippingInfoRepository extends JpaRepository<ShippingInfo, Long>,JpaSpecificationExecutor<ShippingInfo> {
 
     // 根據訂單的 orderId 查詢物流信息
-    List<ShippingInfo> findByOrderOrderId(Long orderId);
+	Optional<ShippingInfo> findByOrderOrderId(Long orderId);
+	
+	Optional<ShippingInfo> findFirstByShippingInfoTrackingNumber(String trackingNumber);
 
+	
     // 根據多個訂單的 orderId 查詢物流信息
     List<ShippingInfo> findByOrderOrderIdIn(List<Long> orderIds);
 

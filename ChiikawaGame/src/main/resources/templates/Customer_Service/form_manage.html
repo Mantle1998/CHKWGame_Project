@@ -1,209 +1,247 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet" />
     <title>客服表單管理</title>
     <style>
-    body {
-	            font-family: Arial, sans-serif;
-	            margin: 20px;
-	        }
-    .content-wrapper {
-	            width: 90%;
-	            max-width: 1400px;
-	            margin: 0 auto;
-	            padding: 0 15px;
-	        }
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+      }
+      .content-wrapper {
+        width: 90%;
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0 15px;
+      }
     </style>
-</head>
-<body>
-    <div th:replace="~{Customer_Service/html/saHeader}"></div>
-    
-	<div class="content-wrapper">
-	    <h1 class="text-center">
-	        <span class="btn header-btn" style="font-size: 25px;">客服表單管理</span>
-	    </h1>
-	    <!-- 分類篩選 -->
-	    <div class="mt-4">
-	        <div class="mb-4" style="display: flex; gap: 10px; align-items: center;">
-	            <label for="categoryFilter" style="flex-shrink: 0;">篩選分類:</label>
-	            <select id="categoryFilter" class="form-control" style="width: 200px;">
-	                <option value="all">全部分類</option>
-	                <option value="帳號相關">帳號相關</option>
-	                <option value="平台守則">平台守則</option>
-	                <option value="買家相關">買家相關</option>
-	                <option value="賣家相關">賣家相關</option>
-	                <option value="其他問題">其他問題</option>
-	            </select>
-	            <button type="button" class="btn btn-primary" id="new" data-bs-toggle="modal" data-bs-target="#addModal" style="margin-left: auto;">新增項目</button>
-	        </div>
-	
-	        <div class="mb-4">
-	            <div class="table-responsive">
-	                <table id="faTable" class="table table-striped">
-	                    <thead>
-	                        <tr>
-	                            <th style="width:10%">表單ID</th>
-	                            <th style="width:10%">使用者ID</th>
-	                            <th style="width:10%">問題分類</th>
-	                            <th style="width:10%">問題標題</th>
-	                            <th style="width:20%">問題內容</th>
-	                            <th style="width:15%">提交時間</th>
-	                            <th style="width:10%">目前狀態</th>
-	                            <th style="width:15%">回覆</th>
-	                        </tr>
-	                    </thead>
-	                    <tbody id="listform">
-	                        <!-- 資料將通過 JavaScript 動態插入 -->
-	                    </tbody>
-	                </table>
-	            </div>
-	        </div>
-	    </div>
-	</div>
+  </head>
+  <body>
+    <div th:replace="~{layout/saHeader}"></div>
 
-    
-    <!-- 修改視窗 -->
-    <div class="modal fade" id="replyModal" tabindex="-1" aria-labelledby="replyModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="replyModalLabel">回覆表單</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="replyForm">
-                        <input type="hidden" id="CSFormId"> <!-- 對應表單 ID -->
-                        <div class="mb-3">
-                            <label for="CSFormReply" class="form-label">回覆內容</label>
-                            <textarea class="form-control" id="CSFormReply" rows="3"></textarea> <!-- 回覆內容 -->
-                        </div>
-                        <div class="mb-3">
-                            <label for="CSFormChack" class="form-label">目前狀態</label>
-                            <select class="form-control" id="CSFormChack">
-                                <option value="1">已完成</option>
-                                <option value="0">待處理</option>
-                            </select> <!-- 狀態選擇 -->
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
-                    <button type="button" class="btn btn-primary" onclick="submitReply()">送出</button>
-                </div>
-            </div>
+    <div class="content-wrapper">
+      <h1 class="text-center">
+        <span class="btn header-btn" style="font-size: 25px">客服表單管理</span>
+      </h1>
+      <!-- 分類篩選 -->
+      <div class="mt-4">
+        <div class="mb-4" style="display: flex; gap: 10px; align-items: center">
+          <label for="categoryFilter" style="flex-shrink: 0">篩選分類:</label>
+          <select id="categoryFilter" class="form-control" style="width: 200px">
+            <option value="all">全部分類</option>
+            <option value="帳號相關">帳號相關</option>
+            <option value="平台守則">平台守則</option>
+            <option value="買家相關">買家相關</option>
+            <option value="賣家相關">賣家相關</option>
+            <option value="其他問題">其他問題</option>
+          </select>
         </div>
+
+        <div class="mb-4">
+          <div class="table-responsive">
+            <table id="faTable" class="table table-striped">
+              <thead>
+                <tr>
+                  <th style="width: 10%">表單ID</th>
+                  <th style="width: 10%">使用者ID</th>
+                  <th style="width: 10%">問題分類</th>
+                  <th style="width: 10%">問題標題</th>
+                  <th style="width: 20%">問題內容</th>
+                  <th style="width: 15%">提交時間</th>
+                  <th style="width: 10%">目前狀態</th>
+                  <th style="width: 15%">回覆</th>
+                </tr>
+              </thead>
+              <tbody id="listform">
+                <!-- 資料將通過 JavaScript 動態插入 -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <div th:replace="~{Customer_Service/html/footer}"></div>
+    <!-- 修改視窗 -->
+    <div
+      class="modal fade"
+      id="replyModal"
+      tabindex="-1"
+      aria-labelledby="replyModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="replyModalLabel">回覆表單</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <form id="replyForm">
+              <input type="hidden" id="CSFormId" />
+              <div class="mb-3">
+                <label for="CSFormReply" class="form-label">回覆內容</label>
+                <textarea
+                  class="form-control"
+                  id="CSFormReply"
+                  rows="3"
+                ></textarea>
+              </div>
+              <div class="mb-3">
+                <label for="CSFormChack" class="form-label">目前狀態</label>
+                <select class="form-control" id="CSFormChack">
+                  <option value="1">已完成</option>
+                  <option value="0">待處理</option>
+                </select>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              關閉
+            </button>
+            <button
+              type="button"
+              class="btn btn-primary"
+              onclick="submitReply()"
+            >
+              送出
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <script src="/js/bootstrap.bundle.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
+    <script
+      src="https://code.jquery.com/jquery-3.7.1.js"
+      integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4="
+      crossorigin="anonymous"
+    ></script>
     <script>
-    		// 定義 API 路徑
-			const apiUrl = "http://localhost:8080/form_manage/json";
-        	// 定義全域變數儲存所有資料
-			let allData = [];
-			
-			$(document).ready(function () {
-			    // 監聽分類篩選的改變事件
-			    $("#categoryFilter").on("change", function() {
-			        const selectedCategory = $(this).val();
-			        filterData(selectedCategory);
-			    });
-			
-			    // 從後端獲取 JSON 資料
-			    $.ajax({
-			        url: apiUrl,
-			        method: "GET",
-			        success: function (data) {
-			            // 儲存所有資料
-			            allData = data;
-			            // 顯示初始資料
-			            displayFilteredData(allData);
-			        },
-			        error: function (error) {
-			            console.error("無法取得資料", error);
-			        }
-			    });
-			});
-			
-			// 篩選資料
-			function filterData(category) {
-			    let filteredData;
-			    if (category === 'all') {
-			        filteredData = allData;
-			    } else {
-			        filteredData = allData.filter(item => item.csformSort === category);
-			    }
-			    displayFilteredData(filteredData);
-			}
-			
-			// 顯示過濾後的資料
-			function displayFilteredData(data) {
-			    let tableBody = $("#listform");
-			    tableBody.empty();
-			
-			    data.forEach(form => {
-			        const status = form.csformChack === 1 ? "已完成" : "待處理";
-			        const row = `
-			            <tr>
-			                <td>${form.csformId}</td>
-			                <td>userid</td>
-			                <td>${form.csformSort}</td>
-			                <td>${form.csformTitle}</td>
-			                <td>${form.csformContent}</td>
-			                <td>${form.csformDate}</td>
-			                <td>${status}</td>
-			                <td>
-			                    <button class="btn btn-success btn-sm" onclick="openReplyModal(${form.csformId}, ${form.csformChack})">回覆</button>
-			                </td>
-			            </tr>
-			        `;
-			        tableBody.append(row);
-			    });
-			}
-			
-			// 開啟回覆視窗並填充資料
-			function openReplyModal(csformId, csformChack) {
-			    $("#CSFormId").val(csformId);
-			    $("#CSFormChack").val(csformChack);
-			    $("#CSFormReply").val("");
-			    $("#replyModal").modal("show");
-			}
-			
-			// 提交回覆資料
-			function submitReply() {
-			    const CSFormId = $("#CSFormId").val();
-			    const CSFormReply = $("#CSFormReply").val();
-			    const CSFormChack = $("#CSFormChack").val();
-			
-			    if (!CSFormReply.trim()) {
-			        alert("回覆內容不可為空！");
-			        return;
-			    }
-			
-			    $.ajax({
-			        url: "http://localhost:8080/submitReply",
-			        method: "POST",
-			        data: {
-			            CSFormId: CSFormId,
-			            CSFormReply: CSFormReply,
-			            CSFormChack: CSFormChack
-			        },
-			        success: function(response) {
-			            console.log("回覆成功:", response);
-			            $("#replyModal").modal("hide");
-			            location.reload();
-			        },
-			        error: function(error) {
-			            console.error("回覆失敗", error);
-			            alert("回覆失敗，請稍後再試！");
-			        }
-			    });
-			}
+      // 定義 API 路徑
+      const apiUrl = "http://localhost:8080/form_manage/json";
+      // 定義全域變數儲存所有資料
+      let allData = [];
+
+      $(document).ready(function () {
+        // 監聽分類篩選的改變事件
+        $("#categoryFilter").on("change", function () {
+          const selectedCategory = $(this).val();
+          filterData(selectedCategory);
+        });
+
+        // 從後端獲取 JSON 資料
+        $.ajax({
+          url: apiUrl,
+          method: "GET",
+          success: function (data) {
+            // 儲存所有資料
+            allData = data;
+            // 顯示初始資料
+            displayFilteredData(allData);
+          },
+          error: function (error) {
+            console.error("無法取得資料", error);
+          },
+        });
+      });
+
+      // 篩選資料
+      function filterData(category) {
+        let filteredData;
+        if (category === "all") {
+          filteredData = allData;
+        } else {
+          filteredData = allData.filter((item) => item.csformSort === category);
+        }
+        displayFilteredData(filteredData);
+      }
+
+      // 顯示過濾後的資料
+      function displayFilteredData(data) {
+        let tableBody = $("#listform");
+        tableBody.empty();
+
+        data.forEach((form) => {
+          const status = form.csformChack === 1 ? "已完成" : "待處理";
+          // 使用實際的 userId
+          const row = `
+                    <tr>
+                        <td>${form.csformId}</td>
+                        <td>${form.userId}</td>
+                        <td>${form.csformSort}</td>
+                        <td>${form.csformTitle}</td>
+                        <td>${form.csformContent}</td>
+                        <td>${form.csformDate}</td>
+                        <td>${status}</td>
+                        <td>
+                            <button class="btn btn-success btn-sm" onclick="openReplyModal(${form.csformId}, ${form.csformChack})">回覆</button>
+                        </td>
+                    </tr>
+                `;
+          tableBody.append(row);
+        });
+      }
+
+      // 開啟回覆視窗並填充資料
+      function openReplyModal(csformId, csformChack) {
+        $("#CSFormId").val(csformId);
+        $("#CSFormChack").val(csformChack);
+        $("#CSFormReply").val("");
+        $("#replyModal").modal("show");
+      }
+
+      // 提交回覆資料
+      function submitReply() {
+        const CSFormId = $("#CSFormId").val();
+        const CSFormReply = $("#CSFormReply").val();
+        const CSFormChack = $("#CSFormChack").val();
+
+        // 加入基本驗證
+        if (!CSFormReply.trim()) {
+          alert("回覆內容不可為空！");
+          return;
+        }
+
+        // 先提交回覆
+        $.ajax({
+          url: "http://localhost:8080/submitReply",
+          method: "POST",
+          data: {
+            CSFormId: CSFormId,
+            CSFormReply: CSFormReply,
+            CSFormChack: CSFormChack,
+          },
+          success: function (response) {
+            console.log("回覆成功:", response);
+            $("#replyModal").modal("hide");
+
+            // 重新載入頁面
+            setTimeout(() => {
+              location.reload();
+            }, 500);
+          },
+          error: function (xhr, status, error) {
+            console.error("回覆提交失敗", {
+              status: xhr.status,
+              response: xhr.responseText,
+              error: error,
+            });
+            alert("回覆提交失敗：" + (xhr.responseText || "請稍後再試！"));
+          },
+        });
+      }
     </script>
-</body>
+  </body>
 </html>

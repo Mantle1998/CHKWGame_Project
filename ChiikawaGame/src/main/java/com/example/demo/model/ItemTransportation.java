@@ -16,7 +16,23 @@ import lombok.Setter;
 @Table(name = "TransportationMethod")
 public class ItemTransportation {
 
-    @Id
+    public int getTransportationId() {
+		return transportationId;
+	}
+
+	public void setTransportationId(int transportationId) {
+		this.transportationId = transportationId;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int transportationId;
 

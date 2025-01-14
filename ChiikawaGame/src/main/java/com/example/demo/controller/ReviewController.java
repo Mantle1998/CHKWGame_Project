@@ -50,6 +50,24 @@ public class ReviewController {
     
     @Autowired
     private OrderService orderService;
+    
+    // 映射: 使用者訂單管理頁面(要改成order那邊的)
+    // 路徑: http://localhost:8080/reviews/orderList
+    @GetMapping("/orderList")
+    public String orderListToReviewItems() {
+        return "review/reviewItems"; 
+    }
+     
+    // 根據訂單編號獲取商品資訊
+    // 路徑: http://localhost:8080/reviews/{orderId}/items
+    // 範例: http://localhost:8080/reviews/1/items
+    @GetMapping("/{orderId}/items")
+    @ResponseBody
+    public ResponseEntity<List<OrderItem>> getOrderItemsByOrderId(@PathVariable Long orderId) {
+        List<OrderItem> orderItems = reviewService.getOrderItemsByOrderId(orderId);
+
+        return ResponseEntity.ok(orderItems);
+    }
 	
     // 新增商品評論 (映射@GetMapping("/orderList"))
     // http://localhost:8080/reviews/add/{orderId}/items/{orderItemId}
@@ -58,7 +76,7 @@ public class ReviewController {
     public ResponseEntity<Reviews> addReview(
             @PathVariable Long orderId,
             @PathVariable Long orderItemId,
-            @RequestParam(value ="reviewItemId", required = false) Long reviewItemId,
+            @RequestParam(value ="reviewItemId", required = false) Integer reviewItemId,
             @RequestParam("files") MultipartFile[] files,
             @RequestParam("reviewEvaluation") int reviewEvaluation,
             @RequestParam("reviewComment") String reviewComment        
@@ -78,7 +96,7 @@ public class ReviewController {
         // 如果 reviewItemId 沒有傳遞，可以從 orderItemId 對應的商品中獲取
         if (reviewItemId == null) {
             // 假設有一個方法可以根據 orderItemId 獲取對應的 itemId
-            reviewItemId = orderService.getItemIdByOrderItemId(orderItemId);
+            reviewItemId = reviewService.getItemIdByOrderItemId(orderItemId);
         }
 
         try {
@@ -94,7 +112,7 @@ public class ReviewController {
     // http://localhost:8080/reviews/checkReviewExist
     @GetMapping("/checkReviewExist")
     public ResponseEntity<Map<String, Boolean>> checkReviewExist(
-        @RequestParam long reviewBuyerId, 
+        @RequestParam int reviewBuyerId, 
         @RequestParam long reviewOrderId
     ) {
         boolean canReview = !reviewService.hasReviewedOrder(reviewBuyerId, reviewOrderId);
@@ -114,12 +132,6 @@ public class ReviewController {
 		return "review/reviewManagement";
 	}
 	
-	// (沒有用到)顯示後台評論頁面 http://localhost:8080/reviews/reviewManagementPageList?p=1
-//	@GetMapping("/reviewManagementPageList")
-//	@ResponseBody
-//    public Page<Reviews> getPagedReviews(@RequestParam(name = "p", defaultValue = "1") int pageNumber) {
-//        return reviewService.findReviewsByPage(pageNumber); // 返回分頁評論資料
-//    }
 	
 	// 狀態+模糊搜尋+日期搜尋(會先帶出全部的資料再根據搜尋顯示)
 	// http://localhost:8080/reviews/search?p=1
@@ -242,19 +254,19 @@ public class ReviewController {
 	}
 	
 	// 利用賣家找到該評論內容
-	// http://localhost:8080/reviews/reviewSellerPage?p=1&reviewSellerId=201
+	// http://localhost:8080/reviews/reviewSellerPage?p=1&reviewSellerId=1
 	@GetMapping("/reviewSellerPage")
 	@ResponseBody
 	public Page<Reviews> rvwList(
 	    @RequestParam(name = "p", defaultValue = "1") Integer pageNumber,
-	    @RequestParam(name = "reviewSellerId") Long reviewSellerId,
+	    @RequestParam(name = "reviewSellerId") Integer reviewSellerId,
 	    @RequestParam(name = "reviewEvaluation", required = false) Integer reviewEvaluation
 	) {
 	    return reviewService.findReviewByBeReviewedAndEvaluation(reviewSellerId, reviewEvaluation, pageNumber);
 	}
 	
 	//計算某賣家的平均評分
-	//http://localhost:8080/reviews/getSellerAverageRating?reviewSellerId=201
+	//http://localhost:8080/reviews/getSellerAverageRating?reviewSellerId=1
 	@GetMapping("/getSellerAverageRating")
 	public ResponseEntity<Map<String, Double>> getAverageRating(@RequestParam String reviewSellerId) {
 		double averageRating = reviewService.getAverageRating(reviewSellerId);
@@ -266,7 +278,7 @@ public class ReviewController {
 	// 計算某賣家的總評論數量
 	// http://localhost:8080/reviews/count/201
     @GetMapping("/count/{reviewSellerId}")
-    public ResponseEntity<Integer> countReviews(@PathVariable Integer reviewSellerId) {
+    public ResponseEntity<Integer> countReviews(@PathVariable int reviewSellerId) {
         int reviewCount = reviewService.countReviewsBySellerId(reviewSellerId);
         return ResponseEntity.ok(reviewCount);
     }
@@ -284,16 +296,16 @@ public class ReviewController {
 	@ResponseBody
 	public Page<Reviews> rvwList2(
 	    @RequestParam(name = "p", defaultValue = "1") Integer pageNumber,
-	    @RequestParam(name = "reviewItemId") Long reviewItemId,
+	    @RequestParam(name = "reviewItemId") Integer reviewItemId,
 	    @RequestParam(name = "reviewEvaluation", required = false) Integer reviewEvaluation
 	) {
 	    return reviewService.findByReviewItemIdAndReviewEvaluation(reviewItemId, reviewEvaluation, pageNumber);
 	}
 	
-	//計算某reviewItemId的平均評分
+	//計算某商品(reviewItemId)的平均評分
 	//http://localhost:8080/reviews/getItemsAverageRating?reviewItemId=1001
 	@GetMapping("/getItemsAverageRating")
-	public ResponseEntity<Map<String, Double>> getItemsAverageRating(@RequestParam Long reviewItemId) {
+	public ResponseEntity<Map<String, Double>> getItemsAverageRating(@RequestParam Integer reviewItemId) {
 		double averageRating = reviewService.getItemsAverageRating(reviewItemId);
 		Map<String, Double> response = new HashMap<>();
 		response.put("averageRating", averageRating);

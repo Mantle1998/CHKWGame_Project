@@ -38,7 +38,7 @@ public interface ReviewRepository extends JpaRepository<Reviews, Long> {
     
     //用賣家和評分找出評論
     @Query(value = "SELECT * FROM reviews r WHERE r.reviewSellerId = :reviewSellerId AND (:reviewEvaluation IS NULL OR r.reviewEvaluation = :reviewEvaluation)", nativeQuery = true)
-    Page<Reviews> findByBeReviewedAndReviewEvaluation(@Param("reviewSellerId") Long reviewSellerId, 
+    Page<Reviews> findByBeReviewedAndReviewEvaluation(@Param("reviewSellerId") Integer reviewSellerId, 
     	    @Param("reviewEvaluation") Integer reviewEvaluation, 
     	    Pageable pageable);
     
@@ -50,26 +50,26 @@ public interface ReviewRepository extends JpaRepository<Reviews, Long> {
     int countByReviewSellerId(Integer integer); //Mantle
     
     // 買家對比reviewOrderId是否存在
-    boolean existsByReviewBuyerIdAndReviewOrderId(long reviewBuyerId, long reviewOrderId);
+    boolean existsByReviewBuyerIdAndReviewOrderId(int reviewBuyerId, long reviewOrderId);
 
     //用reviewItemId和reviewEvaluation找出評論
     @Query(value = "SELECT * FROM reviews r WHERE r.reviewItemId = :reviewItemId AND (:reviewEvaluation IS NULL OR r.reviewEvaluation = :reviewEvaluation)", nativeQuery = true)
-    Page<Reviews> findByReviewItemIdAndReviewEvaluation(@Param("reviewItemId") Long reviewItemId, 
+    Page<Reviews> findByReviewItemIdAndReviewEvaluation(@Param("reviewItemId") Integer reviewItemId, 
     		@Param("reviewEvaluation") Integer reviewEvaluation, 
     		Pageable pageable);
     
     // 自訂查詢：計算某個 reviewItemId 的平均評分
     @Query("SELECT AVG(reviewEvaluation) FROM Reviews r WHERE r.reviewItemId = :reviewItemId")
-    Double findAverageRatingByReviewItemId(@Param("reviewItemId") Long reviewItemId);
+    Double findAverageRatingByReviewItemId(@Param("reviewItemId") Integer reviewItemId);
     
     
     
  // 計算某商品的評價總數
-    long countByReviewItemId(Long itemId); //Mantle
+    long countByReviewItemId(Integer itemId); //Mantle
     
-    List<Reviews> findByReviewItemId(Long reviewItemId); //Mantle
+    List<Reviews> findByReviewItemId(Integer reviewItemId); //Mantle
     
-    Page<Reviews> findByReviewItemId(Long reviewItemId, Pageable pageable); //Mantle
+    Page<Reviews> findByReviewItemId(Integer reviewItemId, Pageable pageable); //Mantle
     
     
 }

@@ -1,138 +1,244 @@
 <!DOCTYPE html>
 <html lang="zh-hant-TW">
-<head>
+  <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>消息中心</title>
-    <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet">
-    <link th:href="@{/css/custom.css}" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <title>我的訊息</title>
+    <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet" />
+    <link th:href="@{/css/custom.css}" rel="stylesheet" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css"
+      rel="stylesheet"
+    />
     <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
     <script th:src="@{/js/jquery.min.js}"></script>
     <style>
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-        }
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+      }
 
-        .main-content {
-            display: flex;
-            height: 100vh;
-        }
+      .main-content {
+        display: flex;
+        height: 100vh;
+      }
 
-        .accordion-item {
-            margin-bottom: 10px;
-        }
+      .accordion-item {
+        margin: 0; /* 移除多餘的外間距 */
+        width: 100%; /* 寬度擴展至容器邊界 */
+      }
 
-        .accordion-button {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+      #messageAccordion {
+        width: 100%; /* Accordion 容器同樣佔據整個寬度 */
+      }
 
-        .accordion-button span {
-            font-weight: bold;
-        }
-
-        .accordion-button .ms-auto {
-            font-size: 14px;
-            color: #6c757d;
-        }
-
-        .accordion-body {
-            font-size: 14px;
-            line-height: 1.6;
-            color: #343a40;
-        }
+      #mainContent {
+        flex: 1; /* 確保內容區域可靈活拉伸 */
+        padding: 20px; /* 添加間距確保內容不緊貼邊界 */
+        background-color: #fff; /* 可選：設置背景顏色 */
+        box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1); /* 可選：添加陰影效果 */
+      }
     </style>
-</head>
+  </head>
 
-<body>
+  <body>
     <!-- 引入 userHeader -->
-    <div th:replace="~{Customer_Service/layout/userHeader}"></div>
+    <div th:replace="~{layout/userHeader}"></div>
 
     <!-- Flexbox -->
-    <div class="d-flex" style="height: 100vh;">
-        <!-- 引入側邊欄 -->
-        <div th:replace="~{Customer_Service/layout/memberCenterSidebar}"></div>
+    <div class="d-flex" style="height: 100vh">
+      <!-- 引入側邊欄 -->
+      <div th:replace="~{layout/memberCenterSidebar}"></div>
 
-        <!-- 主要內容 -->
-        <div id="mainContent" class="p-4">
-            <h2 class="form-title">消息中心</h2>
-            <div id="contentArea">
-                <div class="accordion" id="messageAccordion">
-                    <!-- 消息會動態插入這裡 -->
-                </div>
-            </div>
+      <!-- 主要內容 -->
+      <div id="mainContent" class="p-4">
+        <h2 class="form-title">消息中心</h2>
+        <input type="hidden" id="currentUserId" th:value="${userId}" />
+        <div id="contentArea">
+          <div class="accordion" id="messageAccordion">
+            <!-- 消息會動態插入這裡 -->
+          </div>
         </div>
+         <!-- 回覆表單 Modal -->
+	    <div class="modal fade" id="replyModal" tabindex="-1">
+	      <div class="modal-dialog">
+	        <div class="modal-content">
+	          <div class="modal-header">
+	            <h5 class="modal-title">回覆訊息</h5>
+	            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+	          </div>
+	          <div class="modal-body">
+	            <form id="replyForm">
+	              <input type="hidden" id="replyMessageSenderId" name="messagesenderId">
+	              <input type="hidden" id="replyMessageUserId" name="messageuserId">
+	              <input type="hidden" id="replyMessageSort" name="messageSort" value="徵物通知">
+	              
+	              <div class="mb-3">
+	                <label for="messageTitle" class="form-label">訊息標題</label>
+	                <input type="text" class="form-control" id="messageTitle" name="messageTitle" required>
+	              </div>
+	              
+	              <div class="mb-3">
+	                <label for="messageContent" class="form-label">訊息內容</label>
+	                <textarea class="form-control" id="messageContent" name="messageContent" rows="4" required></textarea>
+	              </div>
+	            </form>
+	          </div>
+	          <div class="modal-footer">
+	            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+	            <button type="button" class="btn btn-primary" onclick="submitReply()">送出</button>
+	          </div>
+	        </div>
+	      </div>
+	    </div>
+      </div>
     </div>
 
-    <!-- footer -->
-    <div th:replace="~{Customer_Service/html/footer}"></div>
-
     <!-- script -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" 
-            integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" 
-            crossorigin="anonymous"></script>
-    <script src="https://code.jquery.com/jquery-3.7.1.js" 
-            integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" 
-            crossorigin="anonymous"></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"
+      integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://code.jquery.com/jquery-3.7.1.js"
+      integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4="
+      crossorigin="anonymous"
+    ></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
-        function loadMessages() {
-            axios.get('/api/messages/user')
-                .then(function(response) {
-                    const messages = response.data;
-                    let contentHtml = '';
+     function formatDate(dateString) {
+        const date = new Date(dateString);
+        return date.toLocaleDateString("zh-TW");
+      }
 
-                    messages.forEach(function(message) {
-                        contentHtml += `
-                            <div class="accordion-item">
-                                <h2 class="accordion-header">
-                                    <button class="accordion-button collapsed" type="button" 
-                                            data-bs-toggle="collapse" 
-                                            data-bs-target="#collapse${message.messageId}">
-                                        <span>${message.messageTitle}</span>
-                                        <span class="ms-auto">${formatDate(message.messageDate)}</span>
-                                    </button>
-                                </h2>
-                                <div id="collapse${message.messageId}" 
-                                     class="accordion-collapse collapse" 
-                                     data-bs-parent="#messageAccordion">
-                                    <div class="accordion-body">
-                                        ${message.messageContent}
-                                    </div>
-                                </div>
-                            </div>
-                        `;
-                    });
+      function loadMessages() {
+        axios.get("/messages/checkLogin")
+          .then((response) => {
+            if (!response.data || !response.data.userId) {
+              throw new Error("未登入");
+            }
+            const userId = response.data.userId;
+            return axios.get(`/messages/user/${userId}`);
+          })
+          .then(function (response) {
+            const messages = response.data;
+            let contentHtml = "";
 
-                    document.querySelector('#messageAccordion').innerHTML = contentHtml;
-                })
-                .catch(function(error) {
-                    console.error('載入訊息失敗:', error);
-                    document.querySelector('#contentArea').innerHTML = 
-                        '<div class="alert alert-danger">載入訊息時發生錯誤</div>';
-                });
-        }
+            if (Array.isArray(messages) && messages.length > 0) {
+              messages.forEach(function (message) {
+                let replyButton = '';
+                if (message.messageSort === '徵物通知') {
+                  replyButton = `
+                    <button class="btn btn-primary btn-sm float-end" 
+                            onclick="openReplyModal(${message.messagesenderId})">
+                      回覆
+                    </button>
+                  `;
+                }
 
-        function formatDate(dateString) {
-            const date = new Date(dateString);
-            return date.toLocaleDateString('zh-TW', {
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit'
-            });
-        }
+                contentHtml += `
+                  <div class="accordion-item">
+                    <h2 class="accordion-header">
+                      <button class="accordion-button collapsed" type="button" 
+                              data-bs-toggle="collapse" 
+                              data-bs-target="#collapse${message.messageId}">
+                        <div class="d-flex justify-content-between w-100">
+                          <div>
+                            <span class="badge bg-primary me-2">${message.messageSort || "未分類"}</span>
+                            <span>${message.messageTitle}</span>
+                          </div>
+                          <span class="ms-auto">${formatDate(message.messageDate)}</span>
+                        </div>
+                      </button>
+                    </h2>
+                    <div id="collapse${message.messageId}" 
+                         class="accordion-collapse collapse" 
+                         data-bs-parent="#messageAccordion">
+                      <div class="accordion-body">
+                        ${message.messageContent}
+                        ${replyButton}
+                      </div>
+                    </div>
+                  </div>
+                `;
+              });
+            } else {
+              contentHtml = '<div class="alert alert-info">目前沒有任何訊息</div>';
+            }
 
-        // 頁面載入時執行
-        $(document).ready(function() {
-            loadMessages();
-        });
+            document.querySelector("#messageAccordion").innerHTML = contentHtml;
+          })
+          .catch(function (error) {
+            console.error("載入訊息時發生錯誤:", error);
+            let errorMessage = "載入訊息時發生錯誤";
+            if (error.response) {
+              if (error.response.status === 401) {
+                errorMessage = "請先登入後再試";
+                window.location.href = "/login";
+              } else if (error.response.data) {
+                errorMessage = error.response.data;
+              }
+            } else if (error.message) {
+              errorMessage = error.message;
+            }
+            document.querySelector("#contentArea").innerHTML = 
+              `<div class="alert alert-danger">${errorMessage}</div>`;
+          });
+      }
+
+      function openReplyModal(senderUserId) {
+  // 從 session 獲取當前使用者 ID (將成為新訊息的寄件者)
+  axios.get("/messages/checkLogin")
+    .then(response => {
+      if (response.data && response.data.userId) {
+        // 設定新訊息的寄件者為當前登入用戶
+        document.getElementById('replyMessageSenderId').value = response.data.userId;
+        // 設定新訊息的收件者為原訊息的寄件者
+        document.getElementById('replyMessageUserId').value = senderUserId;
+        
+        // 清空表單
+        document.getElementById('messageTitle').value = '';
+        document.getElementById('messageContent').value = '';
+        // 顯示 Modal
+        new bootstrap.Modal(document.getElementById('replyModal')).show();
+      }
+    })
+    .catch(error => {
+      console.error("獲取使用者資訊失敗:", error);
+      alert("請先登入後再試");
+    });
+}
+
+function submitReply() {
+  const formData = {
+    // messagesenderId 是當前登入用戶的 ID
+    messagesenderId: document.getElementById('replyMessageSenderId').value,
+    // messageuserId 是原訊息寄件者的 ID（新訊息的收件者）
+    messageuserId: document.getElementById('replyMessageUserId').value,
+    messageSort: document.getElementById('replyMessageSort').value,
+    messageTitle: document.getElementById('messageTitle').value,
+    messageContent: document.getElementById('messageContent').value,
+    messageDate: new Date() // 加入當前日期
+  };
+
+  axios.post('/messages', formData)
+    .then(response => {
+      alert('回覆已送出');
+      bootstrap.Modal.getInstance(document.getElementById('replyModal')).hide();
+      loadMessages(); // 重新載入訊息列表
+    })
+    .catch(error => {
+      console.error("送出回覆時發生錯誤:", error);
+      alert("送出回覆失敗，請稍後再試");
+    });
+}
+
+      document.addEventListener("DOMContentLoaded", loadMessages);
     </script>
-</body>
+  </body>
 </html>

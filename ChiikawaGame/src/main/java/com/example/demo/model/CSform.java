@@ -8,8 +8,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
@@ -58,12 +56,7 @@ public class CSform {
     @Column(name = "CSFormReply")
     private String CSFormReply;
     // 用於儲存回覆內容
-    
-    //串聯user資料表
-//    @ManyToOne
-//    @JoinColumn(name = "userId")  // 外鍵欄位
-//    private LoginBean UserId;
-    
+
     @Column(name = "userId")
     private Integer userId;
     
@@ -130,14 +123,6 @@ public class CSform {
 		// TODO Auto-generated method stub
 		
 	}
-	
-//    public LoginBean getUserId() {
-//        return UserId;
-//    }
-//
-//    public void setUserId(LoginBean userId) {
-//        this.UserId = userId;
-//    }
 
 	 public Integer getUserId() {
 	      return userId;

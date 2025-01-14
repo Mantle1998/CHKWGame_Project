@@ -1,183 +1,153 @@
 package com.example.demo.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
+import lombok.NoArgsConstructor;
+
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 @Entity
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Table(name = "orders")
+@JsonIgnoreProperties({"orderItems"}) // 避免序列化 orderItems
+@NoArgsConstructor
 public class Order {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "order_id")
-    private Long orderId; // 訂單 ID
+    private Long orderId;
 
-    @Column(name = "order_status", nullable = false)
     @NotNull
-    private String orderStatus; // 訂單狀態
+    @Column(name = "order_status", nullable = false)
+    private String orderStatus;
 
-    @Column(name = "order_total", nullable = false)
     @NotNull
     @PositiveOrZero
-    private BigDecimal orderTotal = BigDecimal.ZERO; // 訂單總金額
+    @Column(name = "order_total", nullable = false)
+    private BigDecimal orderTotal = BigDecimal.ZERO;
 
-    @Column(name = "buyer_id", nullable = false)
     @NotNull
-    private Long buyerId; // 買家 ID
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "buyer_id", referencedColumnName = "userId", nullable = false)
+    @JsonIgnore // 避免遞歸問題，通常買家的詳細信息不需要序列化到 Order 中
+    private UserInfo buyer;
 
+    @NotNull
     @Column(name = "order_date", nullable = false)
-    @NotNull
-    private LocalDateTime orderDate; // 訂單日期
+    private LocalDateTime orderDate;
 
+    @NotNull
     @Column(name = "payment_status", nullable = false)
-    @NotNull
-    private String paymentStatus = "Unpaid"; // 付款狀態
+    private String paymentStatus = "Unpaid";
 
+    @NotNull
     @Column(name = "shipping_status", nullable = false)
-    @NotNull
-    private String shippingStatus = "Not Shipped"; // 運輸狀態
+    private String shippingStatus = "Not Shipped";
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    @JsonManagedReference
-    private List<OrderItem> orderItems = new ArrayList<>(); // 訂單項目列表
+    
+    
+    @OneToMany(mappedBy = "order", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JsonManagedReference // 確保序列化時包含 orderItems
+    private List<OrderItem> orderItems = new ArrayList<>();
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    @JsonManagedReference
-    private List<ShippingInfo> shippingInfos = new ArrayList<>(); // 物流信息列表
 
-    // Constructors
-    public Order() {
+
+    @OneToOne(mappedBy = "order")
+    private ShippingInfo shippingInfo;
+
+    public void addOrderItem(OrderItem orderItem) {
+        orderItems.add(orderItem);
+        orderItem.setOrder(this);
     }
 
-    // Business Logic Methods
-    public void recalculateOrderTotal() {
-        this.orderTotal = orderItems.stream()
-                .map(item -> item.getItemPrice().multiply(new BigDecimal(item.getItemQuantity())))
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    public void removeOrderItem(OrderItem orderItem) {
+        orderItems.remove(orderItem);
+        orderItem.setOrder(null);
     }
 
-    public void addOrderItem(OrderItem item) {
-        boolean exists = this.orderItems.stream()
-                .anyMatch(existingItem -> existingItem.getItemId().equals(item.getItemId()));
-        if (!exists) {
-            item.setOrder(this);
-            this.orderItems.add(item);
-            recalculateOrderTotal();
+    public void setShippingInfo(ShippingInfo shippingInfo) {
+        this.shippingInfo = shippingInfo;
+        if (shippingInfo != null && shippingInfo.getOrder() != this) {
+            shippingInfo.setOrder(this);
         }
     }
 
-    public void removeOrderItem(OrderItem item) {
-        this.orderItems.remove(item);
-        recalculateOrderTotal();
-    }
 
-    public void addShippingInfo(ShippingInfo shippingInfo) {
-        shippingInfo.setOrder(this);
-        this.shippingInfos.add(shippingInfo);
-    }
+	public Long getOrderId() {
+		return orderId;
+	}
 
-    public void removeShippingInfo(ShippingInfo shippingInfo) {
-        this.shippingInfos.remove(shippingInfo);
-        shippingInfo.setOrder(null);
-    }
+	public void setOrderId(Long orderId) {
+		this.orderId = orderId;
+	}
 
-    // Getters and Setters
+	public String getOrderStatus() {
+		return orderStatus;
+	}
 
-    public Long getOrderId() {
-        return orderId;
-    }
+	public void setOrderStatus(String orderStatus) {
+		this.orderStatus = orderStatus;
+	}
 
-    public void setOrderId(Long orderId) {
-        this.orderId = orderId;
-    }
+	public BigDecimal getOrderTotal() {
+		return orderTotal;
+	}
 
-    public String getOrderStatus() {
-        return orderStatus;
-    }
+	public void setOrderTotal(BigDecimal orderTotal) {
+		this.orderTotal = orderTotal;
+	}
 
-    public void setOrderStatus(String orderStatus) {
-        this.orderStatus = orderStatus;
-    }
+	public UserInfo getBuyer() {
+		return buyer;
+	}
 
-    public BigDecimal getOrderTotal() {
-        return orderTotal;
-    }
+	public void setBuyer(UserInfo buyer) {
+		this.buyer = buyer;
+	}
 
-    public void setOrderTotal(BigDecimal orderTotal) {
-        this.orderTotal = orderTotal;
-    }
+	public LocalDateTime getOrderDate() {
+		return orderDate;
+	}
 
-    public Long getBuyerId() {
-        return buyerId;
-    }
+	public void setOrderDate(LocalDateTime orderDate) {
+		this.orderDate = orderDate;
+	}
 
-    public void setBuyerId(Long buyerId) {
-        this.buyerId = buyerId;
-    }
+	public String getPaymentStatus() {
+		return paymentStatus;
+	}
 
-    public LocalDateTime getOrderDate() {
-        return orderDate;
-    }
+	public void setPaymentStatus(String paymentStatus) {
+		this.paymentStatus = paymentStatus;
+	}
 
-    public void setOrderDate(LocalDateTime orderDate) {
-        this.orderDate = orderDate;
-    }
+	public String getShippingStatus() {
+		return shippingStatus;
+	}
 
-    public String getPaymentStatus() {
-        return paymentStatus;
-    }
+	public void setShippingStatus(String shippingStatus) {
+		this.shippingStatus = shippingStatus;
+	}
 
-    public void setPaymentStatus(String paymentStatus) {
-        this.paymentStatus = paymentStatus;
-    }
+	public List<OrderItem> getOrderItems() {
+		return orderItems;
+	}
 
-    public String getShippingStatus() {
-        return shippingStatus;
-    }
+	public void setOrderItems(List<OrderItem> orderItems) {
+		this.orderItems = orderItems;
+	}
 
-    public void setShippingStatus(String shippingStatus) {
-        this.shippingStatus = shippingStatus;
-    }
+	public ShippingInfo getShippingInfo() {
+		return shippingInfo;
+	}
 
-    public List<OrderItem> getOrderItems() {
-        return orderItems;
-    }
-
-    public void setOrderItems(List<OrderItem> orderItems) {
-        this.orderItems = orderItems;
-    }
-
-    public List<ShippingInfo> getShippingInfos() {
-        return shippingInfos;
-    }
-
-    public void setShippingInfos(List<ShippingInfo> shippingInfos) {
-        this.shippingInfos = shippingInfos;
-    }
-
-    // equals and hashCode
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        Order order = (Order) o;
-
-        return Objects.equals(orderId, order.orderId);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(orderId);
-    }
 }
