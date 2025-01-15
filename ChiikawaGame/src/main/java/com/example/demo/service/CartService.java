@@ -179,7 +179,7 @@ public class CartService {
             OrderItem orderItem = new OrderItem();
             orderItem.setOrder(order);
             orderItem.setItem(cartItem.getItem());
-            orderItem.setItemSize(cartItem.getItemSize());
+            orderItem.setItemSize(cartItem.getItemSize().getOptionName());
             orderItem.setItemPrice(cartItem.getItemPrice());
             orderItem.setItemQuantity(cartItem.getItemQuantity());
             orderItem.setSeller(cartItem.getSeller());

@@ -35,10 +35,8 @@ public class OrderItem {
     @JoinColumn(name = "seller_id", nullable = false)
     private UserInfo seller;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "item_size", nullable = false)
-    @JsonIgnore // 防止序列化遞歸
-    private ItemOption itemSize;
+    @Column(name = "item_size") // 對應同名欄位
+    private String itemSize;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "item_photo_id", nullable = true)
@@ -53,6 +51,19 @@ public class OrderItem {
     @NotNull
     @Column(name = "item_price", nullable = false)
     private BigDecimal itemPrice;
+    
+    @NotNull
+    @Column(name = "item_name", nullable = false)
+    private String itemName;
+
+    // =======  Getter / Setter  =======
+    public String getItemName() {
+        return itemName;
+    }
+
+    public void setItemName(String itemName) {
+        this.itemName = itemName;
+    }
 
 	public Long getOrderItemId() {
 		return orderItemId;
@@ -86,11 +97,11 @@ public class OrderItem {
 		this.seller = seller;
 	}
 
-	public ItemOption getItemSize() {
+	public String getItemSize() {
 		return itemSize;
 	}
 
-	public void setItemSize(ItemOption itemSize) {
+	public void setItemSize(String itemSize) {
 		this.itemSize = itemSize;
 	}
 

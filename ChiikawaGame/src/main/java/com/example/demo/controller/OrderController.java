@@ -157,7 +157,9 @@ public class OrderController {
                     "itemName", item.getItem() != null ? item.getItem().getItemName() : "未知",
                     "itemQuantity", item.getItemQuantity(),
                     "itemPrice", item.getItemPrice(),
-                    "itemSize", item.getItemSize() != null ? item.getItemSize().getOptionName() : "無"
+                    "itemSize", (item.getItemSize() != null && !item.getItemSize().isEmpty()) 
+                    ? item.getItemSize() 
+                    : "無"
                 )).toList()
             );
 

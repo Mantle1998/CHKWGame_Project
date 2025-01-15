@@ -147,13 +147,19 @@ public class OrderService {
         order.setOrderTotal(totalAmount);
 
         cart.getCartItems().forEach(cartItem -> {
+        	
             OrderItem orderItem = new OrderItem();
             orderItem.setOrder(order);
             orderItem.setItem(cartItem.getItem());
-            orderItem.setItemSize(cartItem.getItemSize());
+            orderItem.setItemSize(cartItem.getItemSize().getOptionName()); // (新，直接存文字)
             orderItem.setItemPrice(cartItem.getItemPrice());
             orderItem.setItemQuantity(cartItem.getItemQuantity());
             orderItem.setSeller(cartItem.getSeller());
+            // 把商品名稱也存進去
+            orderItem.setItemName(cartItem.getItem().getItemName());
+            
+            
+
             order.addOrderItem(orderItem);
         });
 
