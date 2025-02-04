@@ -3,16 +3,16 @@
 
 主要負責功能：
 
-  -網站前臺：商城介面、會員中心
-  -網站後台：廣告管理、人員管理
+  - 網站前臺：商城介面、會員中心
+  - 網站後台：廣告管理、人員管理
 
 
 技術應用：
 
-  -前端：HTML、Bootstrap、CSS、JavaScript、Ajax
-  -後端：Java、Spring MVC、Spring Boot、Hibernate
-  -資料庫：Microsoft SQL Server
-  -版本控制：Git、GitHub
+  - 前端：HTML、Bootstrap、CSS、JavaScript、Ajax
+  - 後端：Java、Spring MVC、Spring Boot、Hibernate
+  - 資料庫：Microsoft SQL Server
+  - 版本控制：Git、GitHub
 
 ## 網站首頁
 ![image](https://github.com/Mantle1998/CHKWGame_Project/blob/main/%E7%B6%B2%E7%AB%99%E9%A6%96%E9%A0%81.png)
