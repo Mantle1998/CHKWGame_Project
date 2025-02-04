@@ -29,12 +29,14 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.example.demo.dto.OrderItemDTO;
 import com.example.demo.model.Order;
 import com.example.demo.model.OrderItem;
 import com.example.demo.model.ReviewPhotos;
 import com.example.demo.model.ReviewPhotosRepository;
 import com.example.demo.model.ReviewRepository;
 import com.example.demo.model.Reviews;
+import com.example.demo.model.UserInfo;
 import com.example.demo.service.OrderService;
 import com.example.demo.service.ReviewService;
 
@@ -63,50 +65,73 @@ public class ReviewController {
     // 範例: http://localhost:8080/reviews/1/items
     @GetMapping("/{orderId}/items")
     @ResponseBody
-    public ResponseEntity<List<OrderItem>> getOrderItemsByOrderId(@PathVariable Long orderId) {
+    public ResponseEntity<List<OrderItemDTO>> getOrderItemsByOrderId(@PathVariable Long orderId) {
         List<OrderItem> orderItems = reviewService.getOrderItemsByOrderId(orderId);
 
-        return ResponseEntity.ok(orderItems);
+        if (orderItems == null || orderItems.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
+        }
+
+        // 將 OrderItem 轉換為 DTO
+        List<OrderItemDTO> orderItemDTOs = orderItems.stream().map(orderItem -> {
+            OrderItemDTO dto = new OrderItemDTO();
+            dto.setOrderItemId(orderItem.getOrderItemId());
+            dto.setItemId(orderItem.getItem().getItemId());
+            dto.setItemName(orderItem.getItem().getItemName());
+            dto.setSellerName(orderItem.getSeller().getUserName()); // 設置賣家名稱
+            dto.setItemPrice(orderItem.getItemPrice());
+            dto.setItemQuantity(orderItem.getItemQuantity());
+
+            // 檢查是否已被評論
+            boolean reviewed = reviewService.hasReviewedOrder(orderItem.getOrderItemId());
+            dto.setReviewed(reviewed); // 設置 reviewed 狀態
+            
+            return dto;
+        }).collect(Collectors.toList());
+
+        return ResponseEntity.ok(orderItemDTOs);
     }
 	
     // 新增商品評論 (映射@GetMapping("/orderList"))
     // http://localhost:8080/reviews/add/{orderId}/items/{orderItemId}
     // http://localhost:8080/reviews/add/9/items/41
     @PostMapping("/add/{orderId}/items/{orderItemId}")
-    public ResponseEntity<Reviews> addReview(
+    public ResponseEntity<?> addOrUpdateReview(
             @PathVariable Long orderId,
             @PathVariable Long orderItemId,
-            @RequestParam(value ="reviewItemId", required = false) Integer reviewItemId,
-            @RequestParam("files") MultipartFile[] files,
-            @RequestParam("reviewEvaluation") int reviewEvaluation,
-            @RequestParam("reviewComment") String reviewComment        
-            ) throws Exception {
-    	
-        // 檢查評分是否有效
-        if (reviewEvaluation < 1 || reviewEvaluation > 5) {
+            @RequestBody Map<String, Object> payload) {
+
+        // 檢查該訂單是否已經存在評論
+        boolean exists = reviewService.hasReviewedOrder(orderId);
+        if (exists) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(null); // 或使用 ResponseEntity.badRequest().body("評分無效，必須在 1 到 5 之間！");
+                                 .body("該訂單已經有評論，無法重複評論！");
         }
 
-        // 如果評論為空，將其設置為空字串以避免 NullPointerException
-        if (reviewComment == null) {
-            reviewComment = "";
+        // 其餘邏輯保持不變
+        int reviewEvaluation;
+        try {
+            reviewEvaluation = Integer.parseInt(payload.get("reviewEvaluation").toString());
+        } catch (NumberFormatException | NullPointerException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
-        
-        // 如果 reviewItemId 沒有傳遞，可以從 orderItemId 對應的商品中獲取
-        if (reviewItemId == null) {
-            // 假設有一個方法可以根據 orderItemId 獲取對應的 itemId
-            reviewItemId = reviewService.getItemIdByOrderItemId(orderItemId);
+
+        String reviewComment = (String) payload.getOrDefault("reviewComment", "");
+
+        // 驗證評分是否有效
+        if (reviewEvaluation < 1 || reviewEvaluation > 5) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
 
         try {
-            Reviews newReview = reviewService.addReviewWithImage(orderId, orderItemId, reviewItemId, files, reviewEvaluation, reviewComment);
+            // 新增評論
+            Reviews newReview = reviewService.addReview(orderId, orderItemId, orderItemId.intValue(), reviewEvaluation, reviewComment);
             return ResponseEntity.ok(newReview);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
-    
     
     // 確認買家是否已經評論過訂單
     // http://localhost:8080/reviews/checkReviewExist

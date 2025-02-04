@@ -2,6 +2,7 @@ package com.example.demo.model;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -70,6 +71,11 @@ public interface ReviewRepository extends JpaRepository<Reviews, Long> {
     List<Reviews> findByReviewItemId(Integer reviewItemId); //Mantle
     
     Page<Reviews> findByReviewItemId(Integer reviewItemId, Pageable pageable); //Mantle
+
+	Optional<Reviews> findByOrderItemOrderItemId(Long orderItemId);
     
+    // 新增方法：檢查是否存在指定的 OrderItemId
+	boolean existsByOrderItemOrderItemId(Long orderItemId);
     
+	boolean existsByReviewOrderId(Long reviewOrderId);
 }

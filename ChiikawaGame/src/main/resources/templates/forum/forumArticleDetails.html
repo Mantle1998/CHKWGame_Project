@@ -148,6 +148,38 @@
             </div>
         </div>
     </div>
+    
+    <!-- 聯絡作者 Modal -->
+<div class="modal fade" id="contactModal" tabindex="-1" aria-labelledby="contactModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="contactModalLabel">聯絡賣家</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="messageForm">
+                    <input type="hidden" id="messagesenderId" name="messagesenderId">
+                    <input type="hidden" id="messageuserId" name="messageuserId">
+                    <input type="hidden" id="messageSort" name="messageSort" value="徵物通知">
+                    <div class="mb-3">
+                        <label for="messageTitle" class="form-label">訊息標題</label>
+                        <input type="text" class="form-control" id="messageTitle" name="messageTitle" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="messageContent" class="form-label">訊息內容</label>
+                        <textarea class="form-control" id="messageContent" name="messageContent" rows="4" required></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" onclick="sendMessage()">發送訊息</button>
+            </div>
+        </div>
+    </div>
+</div>
+
     <!-- 編輯文章 Modal -->
     <input type="hidden" id="articleId" th:value="${article.forumArticleId}">
 	<div class="modal fade" id="editArticleModal" tabindex="-1" aria-labelledby="editArticleModalLabel" aria-hidden="true">
@@ -233,10 +265,141 @@
     let existingImageIds = [];
     
     //聯絡他
-    function contactAuthor() {
-        alert('聯絡功能尚未實現');
+	// 聯絡他
+function contactAuthor() {
+    const articleId = document.getElementById('articleId').value;
+    console.log('Fetching with articleId:', articleId);
+
+    if (!articleId) {
+        console.error('Article ID is missing');
+        alert('系統錯誤：無法取得文章資訊');
+        return;
     }
 
+    fetch(`/forum/checkLoginAndGetArticleAuthor?articleId=${articleId}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok: ' + response.status);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Received data from server:', data);
+            
+            if (!data.isLoggedIn) {
+                alert('請先登入才能聯絡作者');
+                window.location.href = '/login';
+                return;
+            }
+
+            if (!data.success || !data.currentUserId || !data.authorId) {
+                console.error('Invalid response data:', data);
+                alert('系統錯誤：無法獲取用戶資訊');
+                return;
+            }
+
+            if (data.currentUserId === data.authorId) {
+                alert('無法發送訊息給自己');
+                return;
+            }
+
+            // 設置表單數據 - 使用正確的欄位名稱
+            document.getElementById('messagesenderId').value = data.currentUserId;
+            document.getElementById('messageuserId').value = data.authorId;
+            
+            console.log('Set form values:', {
+                messagesenderId: document.getElementById('messagesenderId').value,
+                messageuserId: document.getElementById('messageuserId').value
+            });
+
+            // 重置表單內容
+            document.getElementById('messageForm').reset();
+
+            // 顯示 Modal
+            const contactModal = new bootstrap.Modal(document.getElementById('contactModal'));
+            contactModal.show();
+        })
+        .catch(error => {
+            console.error('Error in contactAuthor:', error);
+            alert('系統錯誤：' + error.message);
+        });
+}
+
+// 發送訊息
+function sendMessage() {
+    // 獲取表單數據
+    const messagesenderId = document.getElementById('messagesenderId').value;
+    const messageuserId = document.getElementById('messageuserId').value;
+    const messageTitle = document.getElementById('messageTitle').value?.trim();
+    const messageContent = document.getElementById('messageContent').value?.trim();
+    const messageSort = document.getElementById('messageSort').value;
+
+    console.log('Preparing to send message with:', {
+        messagesenderId,
+        messageuserId,
+        messageTitle,
+        messageContent,
+        messageSort
+    });
+
+    // 驗證必要欄位
+    if (!messagesenderId || !messageuserId) {
+        console.error('Missing required IDs:', { messagesenderId, messageuserId });
+        alert('系統錯誤：用戶ID未正確設置');
+        return;
+    }
+
+    if (!messageTitle || !messageContent) {
+        alert('請填寫完整的標題和內容');
+        return;
+    }
+
+    // 準備發送的數據
+    const messageData = {
+        messagesenderId: parseInt(messagesenderId),
+        messageuserId: parseInt(messageuserId),
+        messageTitle: messageTitle,
+        messageContent: messageContent,
+        messageSort: messageSort
+    };
+
+    console.log('Sending message data:', messageData);
+
+    // 發送請求
+    fetch('/messages', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(messageData)
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('發送失敗: ' + response.status);
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Message sent successfully:', data);
+        alert('訊息發送成功！');
+        
+        // 關閉 Modal
+        const contactModal = bootstrap.Modal.getInstance(document.getElementById('contactModal'));
+        if (contactModal) {
+            contactModal.hide();
+        }
+        
+        // 清空表單
+        document.getElementById('messageForm').reset();
+    })
+    .catch(error => {
+        console.error('Error sending message:', error);
+        alert('發送失敗：' + error.message);
+    });
+}
+
+	
+	// 編輯modal中
     document.addEventListener('DOMContentLoaded', function() {
         // 編輯modal中
         const editPriceInput = document.getElementById('editPrice');
@@ -440,6 +603,9 @@
 	        console.error('Error:', error);
 	        alert('發生錯誤，請稍後再試');
 	    });
+	    
+	    
+	    
 	}
     </script>
 </body>

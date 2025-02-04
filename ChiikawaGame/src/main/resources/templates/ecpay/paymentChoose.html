@@ -1,85 +1,203 @@
 <!DOCTYPE html>
-<html lang="zh-Hant-TW">
-<html xmlns:th="http://www.thymeleaf.org"></html>
+<html lang="zh-Hant">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="css/bootstrap.min.css">
-    <title>EC Pay Checkout</title>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <title>選擇付款方式</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <style>
+        .main-content {
+            padding-top: 80px;
+            background-color: #ffffff;
+        }
+
+        .payment-container {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .payment-option {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .payment-option:hover {
+            background-color: #e9ecef;
+            transform: translateY(-2px);
+        }
+
+        .payment-option.selected {
+            border-color: #198754;
+            background-color: #f8f9fa;
+        }
+
+        .payment-option img {
+            max-height: 40px;
+            margin-right: 10px;
+        }
+
+        .payment-info {
+            color: #6c757d;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+
+        .submit-btn {
+            margin-top: 20px;
+            width: 100%;
+        }
+    </style>
 </head>
-<body class="container mt-5">
-    <h1 class="mb-4">EC Pay 結帳</h1>
+<body>
+    <!-- 引入 Header -->
+    <div th:replace="~{layout/userHeader}"></div>
 
-    <!-- 送貨方式 -->
-    <div class="mb-3">
-        <label for="" class="form-label">送貨方式</label>
-        <div class="form-check">
-            <input class="form-check-input" type="radio" name="deliveryMethod" id="homeDelivery" value="宅配" checked>
-            <label class="form-check-label" for="homeDelivery">宅配</label>
+    <main class="main-content">
+        <div class="container my-5">
+            <div class="payment-container">
+                <h2 class="text-center mb-4">選擇付款方式</h2>
+                <form id="payment-form">
+                    <div class="payment-option" onclick="selectPayment('ecpay')">
+                        <div class="d-flex align-items-center">
+                            <input type="radio" name="paymentMethod" value="ecpay" id="ecpay" class="me-2" required>
+                            
+                            <label for="ecpay" class="mb-0">綠界支付</label>
+                        </div>
+                        <div class="payment-info">
+                            支援信用卡、超商條碼付款
+                        </div>
+                    </div>
+
+
+
+                    <button type="submit" class="btn btn-success submit-btn">確認付款方式</button>
+                </form>
+            </div>
         </div>
-        <div class="form-check">
-            <input class="form-check-input" type="radio" name="deliveryMethod" id="storePickup" value="超商取貨">
-            <label class="form-check-label" for="storePickup">超商取貨 (7-11)</label>
-        </div>
-    </div>
+    </main>
 
-    <!-- 付款方式 -->
-    <div class="mb-3">
-        <label for="" class="form-label">付款方式</label>
-        <div class="form-check">
-            <input class="form-check-input" type="radio" name="paymentMethod" id="ecpay" value="綠界支付">
-            <label class="form-check-label" for="ecpay">綠界支付</label>
-        </div>
-    </div>
-    
-    <!-- 假設有 orderId (可以從前端動態獲得，這裡用固定值示範) -->
-    <input type="hidden" id="orderId" value="9" /> <!-- 這裡假設訂單 ID 是 12345 -->
-    <input type="hidden" id="totalAmount" value="10000" />
 
-    <!-- 提交按鈕 -->
-    <div>
-        <button class="btn btn-primary" id="checkoutButton">前往結帳</button>
-    </div>
 
-    <!-- Bootstrap JS -->
-    <script src="js/bootstrap.bundle.min.js"></script>
-
-    <!-- AJAX 請求 -->
     <script>
-        $(document).ready(function() {
-            $('#checkoutButton').click(function() {
-                // 取得訂單 ID 和總金額
-                const orderId = $('#orderId').val();
-                const totalAmount = $('#totalAmount').val();
+        // 從 URL 獲取 orderId
+        function getOrderIdFromUrl() {
+           const urlParams = new URLSearchParams(window.location.search); //從前一個網頁抓取orderId
+           const orderId = urlParams.get('orderId');
 
-                // 發送 AJAX 請求
-                $.ajax({
-                    url: '/ecpay/submitOrder', 
-                    type: 'POST',
-                    contentType: 'application/json',
-                    data: JSON.stringify({ 
-                        orderId: orderId,
-                        totalAmount: totalAmount 
-                    }),
-                    success: function(response) {
-                        // 創建一個隱藏的 div 來放置表單
-                        const formContainer = $('<div>').html(response);
-                        $('body').append(formContainer);
+            
+            if (!orderId) {
+                alert('找不到訂單編號！');
+                window.location.href = '/orders/buyer'; // 返回買家訂單畫面
+                return null;
+            }
+            return orderId;
+        }
 
-                        // 找到綠界回傳的表單
-                        const form = formContainer.find('form');
-                        if (form.length > 0) {
-                            // 自動提交表單到綠界
-                            form.submit();
-                        } else {
-                            alert('未找到支付表單！');
-                        }
-                    },
-                    error: function(xhr, status, error) {
-                        console.error('錯誤:', error);
-                        alert('伺服器錯誤，請稍後再試！');
-                    }
+        // 選擇付款方式的視覺效果
+        function selectPayment(method) {
+            document.querySelectorAll('.payment-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            const selectedOption = document.querySelector(`#${method}`).closest('.payment-option');
+            selectedOption.classList.add('selected');
+            document.querySelector(`#${method}`).checked = true;
+        }
+
+		// 處理付款提交
+		async function handlePayment(event) {
+		    event.preventDefault();
+		    
+		    const orderId = getOrderIdFromUrl();
+		    if (!orderId) return;  // 如果沒有 orderId 就直接返回
+		
+		    const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked');
+		    if (!paymentMethod) {
+		        alert('請選擇付款方式');
+		        return;
+		    }
+		
+		    const submitButton = document.querySelector('.submit-btn');
+		    submitButton.disabled = true;
+		    submitButton.textContent = '處理中...';
+		
+		    try {
+		        if (paymentMethod.value === 'ecpay') {
+		            // 發送訂單到綠界支付
+		            try {
+		                const ecpayResponse = await fetch('/ecpay/submitOrder', {
+		                    method: 'POST',
+		                    headers: {
+		                        'Content-Type': 'application/json'
+		                    },
+		                    body: JSON.stringify({
+		                        orderId: orderId
+		                    })
+		                });
+		
+		                if (!ecpayResponse.ok) {
+		                    const ecpayError = await ecpayResponse.json();
+		                    throw new Error(ecpayError.message || '綠界支付處理失敗');
+		                }
+		
+		                // 取得綠界回傳的表單並導向
+		                const ecpayForm = await ecpayResponse.text();
+		                // 創建一個臨時的 div 來放置綠界回傳的表單
+		                const tempDiv = document.createElement('div');
+		                tempDiv.innerHTML = ecpayForm;
+		                document.body.appendChild(tempDiv);
+		                
+		                // 自動提交表單到綠界
+		                const form = tempDiv.querySelector('form');
+		                if (form) {
+		                    form.submit();
+		                } else {
+		                    throw new Error('無法取得綠界支付表單');
+		                }
+		            } catch (ecpayError) {
+		                console.error('綠界支付處理失敗：', ecpayError);
+		                alert('綠界支付處理失敗：' + ecpayError.message);
+		                window.location.href = '/orders/buyer';
+		            }
+		        } else {
+		            // 取貨付款，直接轉跳到訂單頁面
+		            alert('送出成功');
+		            window.location.href = '/orders/buyer-orders';
+		        }
+		    } catch (error) {
+		        console.error('處理失敗：', error);
+		        alert('處理失敗：' + error.message);
+		        window.location.href = '/orders/buyer';
+		    } finally {
+		        submitButton.disabled = false;
+		        submitButton.textContent = '確認付款方式';
+		    }
+		}
+
+        // 初始化頁面
+        document.addEventListener('DOMContentLoaded', function() {
+            // 檢查是否有 orderId
+            const orderId = getOrderIdFromUrl();
+            if (!orderId) return;
+
+            // 綁定表單提交事件
+            const paymentForm = document.getElementById('payment-form');
+            paymentForm.addEventListener('submit', handlePayment);
+
+            // 綁定付款方式選擇的點擊事件
+            document.querySelectorAll('.payment-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    const methodId = this.querySelector('input[type="radio"]').id;
+                    selectPayment(methodId);
                 });
             });
         });

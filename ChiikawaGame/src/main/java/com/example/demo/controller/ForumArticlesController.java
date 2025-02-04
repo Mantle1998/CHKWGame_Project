@@ -1,6 +1,7 @@
 package com.example.demo.controller;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -517,6 +518,54 @@ public class ForumArticlesController {
 	    }
 	    return ResponseEntity.notFound().build();
 	}
+	
+    // 文章詳情:聯絡他(獲取該文章userId和登入者的userId)
+    // http://localhost:8080/forum/getArticleAuthor?articleId=1
+    @GetMapping("/checkLoginAndGetArticleAuthor")
+    @ResponseBody
+    public ResponseEntity<?> checkLoginAndGetArticleAuthor(@RequestParam int articleId, HttpSession session) {
+        LoginBean user = (LoginBean) session.getAttribute("user");
+        boolean isLoggedIn = user != null;
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("isLoggedIn", isLoggedIn);
+
+        if (isLoggedIn) {
+            try {
+                ForumArticles article = forumArticlesService.getArticleById(articleId);
+                if (article != null && article.getUserInfo() != null) {
+                    response.put("success", true);
+                    response.put("currentUserId", user.getUserId());
+                    response.put("authorId", article.getUserInfo().getUserId());
+                } else {
+                    response.put("success", false);
+                    response.put("message", "找不到文章或作者信息");
+                }
+            } catch (Exception e) {
+                response.put("success", false);
+                response.put("message", e.getMessage());
+            }
+        }
+
+        return ResponseEntity.ok(response);
+    }
+    
+    //後端端點來獲取當前用戶信息
+    @GetMapping("/forum/getCurrentUser")
+    @ResponseBody
+    public Map<String, Object> getCurrentUser(HttpSession session) {
+        Map<String, Object> response = new HashMap<>();
+        UserInfo currentUser = (UserInfo) session.getAttribute("user");
+        
+        if (currentUser != null) {
+            response.put("userId", currentUser.getUserId());
+            response.put("success", true);
+        } else {
+            response.put("success", false);
+        }
+        
+        return response;
+    }
     
     
 }

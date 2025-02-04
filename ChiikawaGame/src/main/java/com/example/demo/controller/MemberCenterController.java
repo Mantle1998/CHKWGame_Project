@@ -465,16 +465,4 @@ public class MemberCenterController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("message", "刪除地址失敗"));
         }
     }
-
-
-
-    @GetMapping("/memberCenter/purchase")
-    public String showMemberPurchase() {
-        return "memberCenter/memberPurchase";
-    }
-
-    @GetMapping("/memberCenter/order")
-    public String showMemberOrder() {
-        return "memberCenter/memberOrder";
-    }
 }

@@ -12,14 +12,20 @@ import java.util.Optional;
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecificationExecutor<Order> {
 
-    List<Order> findByBuyer_UserId(Long userId);
+	List<Order> findByBuyer_UserIdOrderByOrderDateDesc(Long buyerId);
 
     Optional<Order> findByOrderId(Long orderId);
 
     List<Order> findByOrderStatus(String orderStatus);
 
-    @Query("SELECT DISTINCT o FROM Order o JOIN o.orderItems oi WHERE oi.seller.userId = :sellerId")
-    List<Order> findAllBySellerUserId(@Param("sellerId") Long sellerId);
+    @Query("""
+    	    SELECT DISTINCT o 
+    	    FROM Order o 
+    	    JOIN o.orderItems oi 
+    	    WHERE oi.seller.userId = :sellerId
+    	    ORDER BY o.orderDate DESC
+    	""")
+    	List<Order> findAllBySellerUserId(@Param("sellerId") Long sellerId);
 
     @Query("""
         SELECT o FROM Order o 

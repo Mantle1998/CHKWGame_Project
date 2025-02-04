@@ -34,9 +34,18 @@ public class ReviewService {
 
     @Autowired
     private ImageStorageService imageStorageService;
+    
+    public Optional<Reviews> findReviewByOrderItemId(Long orderItemId) {
+        return reviewRepository.findByOrderItemOrderItemId(orderItemId);
+    }
 
+    public boolean hasReviewedOrder(Long reviewOrderId) {
+        return reviewRepository.existsByReviewOrderId(reviewOrderId);
+    }
+    
     //新增商品評論
-    public Reviews addReviewWithImage(Long orderId, Long orderItemId, Integer reviewItemId, MultipartFile[] files, Integer reviewEvaluation, String reviewComment) {
+    // 新增商品評論（不存圖片）
+    public Reviews addReview(Long orderId, Long orderItemId, Integer reviewItemId, Integer reviewEvaluation, String reviewComment) {
         // 確認該商品屬於指定訂單
         OrderItem orderItem = orderItemRepository.findById(orderItemId)
                 .orElseThrow(() -> new RuntimeException("OrderItem not found"));
@@ -47,33 +56,18 @@ public class ReviewService {
 
         // 建立評論
         Reviews review = new Reviews();
-        review.setReviewOrderId(orderItem.getOrder().getOrderId());// 設定訂單 ID
-        review.setReviewSellerId(orderItem.getSeller().getUserId());         // 設定賣家 ID
-        review.setReviewBuyerId(orderItem.getOrder().getBuyer().getUserId());// 設定買家 ID
-        review.setReviewEvaluation(reviewEvaluation);              // 設定評分
-        review.setReviewComment(reviewComment);    				   // 設定評論
-        review.setReviewItemId(reviewItemId);					   // 設定商品ID
-        review.setReviewStatus(1); 								   // 設定狀態
-        review.setReviewDate(new Date());                          // 設定評論日期
-        review.setOrderItem(orderItem);                            // 設定關聯的 OrderItem
+        review.setReviewOrderId(orderItem.getOrder().getOrderId()); // 訂單 ID
+        review.setReviewSellerId(orderItem.getSeller().getUserId()); // 賣家 ID
+        review.setReviewBuyerId(orderItem.getOrder().getBuyer().getUserId()); // 買家 ID
+        review.setReviewEvaluation(reviewEvaluation); // 評分
+        review.setReviewComment(reviewComment == null ? "" : reviewComment); // 評論內容
+        review.setReviewItemId(reviewItemId); // 商品 ID
+        review.setReviewStatus(1); // 狀態
+        review.setReviewDate(new Date()); // 評論日期
+        review.setOrderItem(orderItem); // 關聯的 OrderItem
 
         // 儲存評論到資料庫
-        Reviews savedReview = reviewRepository.save(review);
-
-        // 儲存圖片
-        if (files != null && files.length > 0) {
-            for (MultipartFile file : files) {
-                if (!file.isEmpty()) {
-                    String photoPath = imageStorageService.saveImage(file);
-                    ReviewPhotos reviewPhoto = new ReviewPhotos();
-                    reviewPhoto.setReviews(savedReview);
-                    reviewPhoto.setReviewPhoto(photoPath);
-                    reviewPhotosRepository.save(reviewPhoto);
-                }
-            }
-        }
-
-        return savedReview;
+        return reviewRepository.save(review);
     }
     
     // 查詢是否已存在該買家對該訂單的評論
@@ -183,6 +177,10 @@ public class ReviewService {
     public double getItemsAverageRating(Integer reviewItemId) {
         Double averageRating = reviewRepository.findAverageRatingByReviewItemId(reviewItemId);
         return averageRating != null ? averageRating : 0.0; // 防止空值返回
+    }
+
+    public Reviews saveReview(Reviews review) {
+        return reviewRepository.save(review); // 使用 JpaRepository 的 save 方法儲存評論
     }
     
 }

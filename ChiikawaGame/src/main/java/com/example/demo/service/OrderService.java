@@ -185,7 +185,7 @@ public class OrderService {
      * 根據買家ID獲取訂單
      */
     public List<Order> getOrdersByBuyerId(Long buyerId) {
-        return orderRepository.findByBuyer_UserId(buyerId);
+        return orderRepository.findByBuyer_UserIdOrderByOrderDateDesc(buyerId);
     }
 
     /**

@@ -24,12 +24,14 @@ public class ECPayController {
     ECPayService ecpayService;
     
 
-    // http://localhost:8080/ecpay/showECPay
-    @GetMapping("/ecpay/showECPay")
-    public String showECPay() {
-        return "ecpay/ecpayTest";
+    // 映射 : 預計轉跳的頁面
+    // http://localhost:8080/paymentChoose
+    @GetMapping("/paymentChoose")
+    public String paymentChoose() {
+        return "ecpay/paymentChoose";
     }
 
+    // 抓取orderId轉跳至綠界
     // http://localhost:8080/ecpay/submitOrder
     @PostMapping("/ecpay/submitOrder")
     @ResponseBody
@@ -49,6 +51,7 @@ public class ECPayController {
         return ecpayService.ecpayCheckout(orderId);
     }
 
+    // 綠界回傳的資料
     @PostMapping("/callback")
     @ResponseBody
     public String handleECPayCallback(HttpServletRequest request) {
@@ -70,15 +73,24 @@ public class ECPayController {
         System.out.println("receivedCheckMacValue:"+receivedCheckMacValue);
         System.out.println("RtnCode 付款結果(1=成功/10300066=付款結果待確認中):"+RtnCode);      
         
-        //不驗證(請把下面if關起來)
         String orderIdStr = requestData.get("CustomField1"); // 取得訂單 ID
         Long orderId = Long.parseLong(orderIdStr); // 將 String 轉為 Long
+    	//若付款成功，則更新付款狀態
+    	ecpayService.updatePaymentStatus(orderId);
+    	return "1|OK";
+    	
+    	/*//這裡要用ngrok開啟通訊阜才能接收資料比對
+        if(RtnCode.equals(1)) {
+        	//若付款成功，則更新付款狀態
+        	ecpayService.updatePaymentStatus(orderId);      	
+        	//回傳結果給綠界
+        	return "1|OK";
+        }else {
+        	System.out.println("尚未付款");
+        	return "";
+        }
+        */              
         
-        //若付款成功，則更新付款狀態
-        ecpayService.updatePaymentStatus(orderId);      	
-        
-        //回傳結果給綠界
-        return "1|OK";
         
     }
 

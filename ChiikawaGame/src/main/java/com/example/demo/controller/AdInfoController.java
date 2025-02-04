@@ -14,34 +14,37 @@ import java.util.HashMap;
 import java.util.Base64;
 import java.util.stream.Collectors;
 
+
+//處理廣告的前端請求
 @Controller
 public class AdInfoController {
 
     @Autowired
     private AdInfoRepository adRepository;
 
-    // 顯示廣告資料總覽頁面 (http://localhost:8080/adInfo)
+    // 廣告總覽的頁面 (http://localhost:8080/adInfo)
     @GetMapping("/adInfo")
     public String showAdInfo() {
         return "adInfo/adInfo";
     }
 
-    // 取得所有廣告資料，回傳 JSON 格式 (http://localhost:8080/adInfo/json)
+    // 取得所有廣告，回傳 JSON 格式 (http://localhost:8080/adInfo/json)
     @GetMapping("/adInfo/json")
     @ResponseBody
-    public List<Map<String, Object>> getAdInfoJson() {
-        return adRepository.findAll().stream().map(ad -> {
-            Map<String, Object> adMap = new HashMap<>();
+    public List<Map<String, Object>> getAdInfoJson() { //List用來存放資料，每一筆資料是一個 Map<String, Object>
+        return adRepository.findAll().stream().map( //.stream()轉換成資料流 .map()將class adInfo轉換為Map
+        		ad -> { //Lambda 表達式將每個 AdInfo 物件轉換為一個 Map<String, Object>
+            Map<String, Object> adMap = new HashMap<>(); //新建一個 HashMap，用來存放該 AdInfo 的各個屬性
             adMap.put("adId", ad.getAdId());
             adMap.put("adName", ad.getAdName());
             adMap.put("adInfo", ad.getAdInfo());
-            adMap.put("adImageBase64",
-                    ad.getAdImage() != null ? Base64.getEncoder().encodeToString(ad.getAdImage()) : null);
-            return adMap;
-        }).collect(Collectors.toList());
+            adMap.put("adImageBase64", 
+                    ad.getAdImage() != null ? Base64.getEncoder().encodeToString(ad.getAdImage()) : null); //將圖片轉換為 Base64 編碼的字串
+            return adMap; //每個 ad 都會被轉換為一個 Map<String, Object>
+        }).collect(Collectors.toList()); //.collect()將結果轉為List
     }
 
-    // 新增廣告資料 (http://localhost:8080/adInfo/add)
+    // 新增廣告 (http://localhost:8080/adInfo/add)
     @PostMapping("/adInfo/add")
     @ResponseBody
     public ResponseEntity<String> addAdInfo(@RequestParam("adName") String adName,
@@ -64,7 +67,7 @@ public class AdInfoController {
         }
     }
 
-    // 更新廣告資料 (http://localhost:8080/adInfo/update)
+    // 更新廣告 (http://localhost:8080/adInfo/update)
     @PostMapping("/adInfo/update")
     @ResponseBody
     public ResponseEntity<String> updateAdInfo(@RequestParam("adId") Integer adId,

@@ -225,10 +225,10 @@ function openEditBrandModal(brandId) {
 // 刪除品牌
 function deleteBrand(brandId) {
     if (confirm("確定刪除此品牌?")) {
-        axios.delete(`http://localhost:8080/api/brand/${brandId}`)
+        axios.delete(`http://localhost:8080/api/brand/delete/${brandId}`)
             .then(response => {
                 document.getElementById("upload_result").innerText = "刪除成功!";
-                loadBrandList(); // 重新載入品牌列表
+                loadBrandList(); 
             })
             .catch(error => {
                 document.getElementById("upload_result").innerText = "刪除失敗";

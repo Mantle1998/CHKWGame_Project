@@ -234,7 +234,7 @@ document.addEventListener("DOMContentLoaded", () => {
             endDate: document.getElementById("endDateFilter").value || null,
         };
 
-        const params = new URLSearchParams({ page, size: 10 });
+        const params = new URLSearchParams({ page, size: 100 });
         Object.entries(filters).forEach(([key, value]) => {
             if (value) params.append(key, value);
         });

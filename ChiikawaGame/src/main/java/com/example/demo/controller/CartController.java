@@ -195,7 +195,10 @@ public class CartController {
 
             cartService.clearCart(cart.getBuyer());
 
-            return ResponseEntity.ok(Map.of("orderId", order.getOrderId(), "redirectUrl", "/payment/" + order.getOrderId()));
+            return ResponseEntity.ok(Map.of(
+            	    "orderId", order.getOrderId(),
+            	    "redirectUrl", "/orders/buyer-orders"
+            	));
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("伺服器內部錯誤: " + e.getMessage());

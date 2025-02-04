@@ -292,31 +292,31 @@ public class OrderController {
     /**
      * 處理付款請求
      */
-    @PostMapping("/buyer/{orderId}/pay")
-    @ResponseBody
-    public ResponseEntity<?> processPayment(@PathVariable Long orderId, @SessionAttribute(name = "userId", required = false) Long userId) {
-        if (userId == null) {
-            return ResponseEntity.status(403).body("用戶未登入");
-        }
-
-        Optional<Order> orderOpt = orderService.getOrderById(orderId);
-        if (orderOpt.isEmpty()) {
-            return ResponseEntity.status(404).body("訂單不存在");
-        }
-
-        Order order = orderOpt.get();
-        if (!order.getBuyer().getUserId().equals(userId)) {
-            return ResponseEntity.status(403).body("無權訪問該訂單");
-        }
-
-        // 這裡加入付款邏輯，例如更新付款狀態
-        boolean paymentSuccess = orderService.updateOrderDetails(orderId, "Paid", null, null);
-        if (paymentSuccess) {
-            return ResponseEntity.ok(Map.of("message", "付款成功"));
-        } else {
-            return ResponseEntity.status(500).body(Map.of("error", "付款失敗"));
-        }
-    }
+//    @PostMapping("/buyer/{orderId}/pay")
+//    @ResponseBody
+//    public ResponseEntity<?> processPayment(@PathVariable Long orderId, @SessionAttribute(name = "userId", required = false) Long userId) {
+//        if (userId == null) {
+//            return ResponseEntity.status(403).body("用戶未登入");
+//        }
+//
+//        Optional<Order> orderOpt = orderService.getOrderById(orderId);
+//        if (orderOpt.isEmpty()) {
+//            return ResponseEntity.status(404).body("訂單不存在");
+//        }
+//
+//        Order order = orderOpt.get();
+//        if (!order.getBuyer().getUserId().equals(userId)) {
+//            return ResponseEntity.status(403).body("無權訪問該訂單");
+//        }
+//
+//        // 這裡加入付款邏輯，例如更新付款狀態
+//        boolean paymentSuccess = orderService.updateOrderDetails(orderId, "Paid", null, null);
+//        if (paymentSuccess) {
+//            return ResponseEntity.ok(Map.of("message", "付款成功"));
+//        } else {
+//            return ResponseEntity.status(500).body(Map.of("error", "付款失敗"));
+//        }
+//    }
 
     /**
      * 顯示賣家訂單頁面

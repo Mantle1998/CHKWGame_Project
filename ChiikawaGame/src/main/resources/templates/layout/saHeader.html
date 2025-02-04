@@ -17,7 +17,7 @@
             <div class="container-fluid">
                 <!-- 標誌 (Logo) -->
                 <a class="navbar-brand btn btn-warning text-black me-3" th:href="@{/saInfo}">
-                    CHKWGame
+                    CHKWGame_EMP
                 </a>
                 
                 <!-- 響應式切換按鈕 -->
@@ -52,10 +52,10 @@
                             <ul class="dropdown-menu" aria-labelledby="productManagementDropdown">
                                 <li><a class="dropdown-item" th:href="@{/item/itemList}">商品資訊總覽</a></li>
                                 <li><a class="dropdown-item" th:href="@{/forum/forumArticlesManagement}">文章總覽</a></li>
-                                <li><a class="dropdown-item" th:href="@{/}">訂單總覽</a></li>
-                                <li><a class="dropdown-item" th:href="@{/review/reviewManagement}">評論總覽</a></li>
-                                <li><a class="dropdown-item" th:href="@{/}">客服表單總覽</a></li>
-                                <li><a class="dropdown-item" th:href="@{/}">FAQ總覽</a></li>
+                                <li><a class="dropdown-item" th:href="@{/orders/order-management}">訂單總覽</a></li>
+                                <li><a class="dropdown-item" th:href="@{/reviews/reviewManagement}">評論總覽</a></li>
+                                <li><a class="dropdown-item" th:href="@{/form_manage}">客服表單總覽</a></li>
+                                <li><a class="dropdown-item" th:href="@{/QA_manage}">FAQ總覽</a></li>
                             </ul>
                         </li>
                         <!-- 人員資料管理下拉選單 -->
@@ -71,10 +71,7 @@
                         </li>
                     </ul>
 
-                    <!-- 登出按鈕 -->
-                    <div class="d-flex">
-                        <button type="button" class="btn btn-outline-light me-2">登出</button>
-                    </div>
+                    
                 </div>
             </div>
         </nav>

@@ -51,7 +51,7 @@ public class ECPayService {
         obj.setTotalAmount(orderTotal);
         obj.setTradeDesc("訂單交易");
         obj.setItemName("商品名稱ABC");
-        obj.setReturnURL("https://93ff-114-27-2-3.ngrok-free.app/callback");
+        obj.setReturnURL("https://2c97-118-232-68-133.ngrok-free.app/callback");
         obj.setClientBackURL("http://localhost:8080/ecpay/showECPay");
         obj.setCustomField1(orderId.toString()); //真訂單編號
         obj.setNeedExtraPaidInfo("Y");
